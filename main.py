@@ -1,10 +1,14 @@
-from stockEngine import StockEngine
+import sys
+from PyQt5.QtCore import QTimer
+from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QTextEdit, \
+    QPushButton
 
-stockPath = "C:\\Users\\radek\\Downloads\\stockfish-11-win\\stockfish-11-win\\Windows\\stockfish_20011801_x64.exe"
+from chessGame import ChessGame
+
 
 if __name__ == '__main__':
-    engine = StockEngine(stockPath)
+    app = QApplication(sys.argv)
+    game = ChessGame()
+    game.show()
+    sys.exit(app.exec_())
 
-    while True:
-        move = input()
-        engine.move(move)
