@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1108</width>
+    <height>985</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <widget class="QPushButton" name="SubmitButton">
+    <property name="geometry">
+     <rect>
+      <x>850</x>
+      <y>870</y>
+      <width>251</width>
+      <height>81</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Submit move</string>
+    </property>
+   </widget>
+   <widget class="QTextEdit" name="textEdit">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>870</y>
+      <width>831</width>
+      <height>81</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="ReverseButton">
+    <property name="geometry">
+     <rect>
+      <x>850</x>
+      <y>540</y>
+      <width>251</width>
+      <height>71</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Reverse the clock</string>
+    </property>
+   </widget>
+   <widget class="QGroupBox" name="BoardBox">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>10</y>
+      <width>831</width>
+      <height>851</height>
+     </rect>
+    </property>
+    <property name="title">
+     <string>Board</string>
+    </property>
+   </widget>
+   <widget class="QGroupBox" name="ClockBox1">
+    <property name="geometry">
+     <rect>
+      <x>850</x>
+      <y>10</y>
+      <width>251</width>
+      <height>251</height>
+     </rect>
+    </property>
+    <property name="title">
+     <string>Clock1</string>
+    </property>
+   </widget>
+   <widget class="QGroupBox" name="ClockBox2">
+    <property name="geometry">
+     <rect>
+      <x>850</x>
+      <y>270</y>
+      <width>251</width>
+      <height>261</height>
+     </rect>
+    </property>
+    <property name="title">
+     <string>Clock2</string>
+    </property>
+   </widget>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
