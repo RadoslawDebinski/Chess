@@ -44,4 +44,9 @@
         <file alias="a">boarda.png</file>
     </qresource>
 
+    <qresource prefix="/label">
+        <file alias="abcd">abcdLabel.png</file>
+        <file alias="1234">1234Label.png</file>
+    </qresource>
+
 </RCC>

@@ -1,10 +1,7 @@
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
-from PyQt5.QtCore import pyqtSignal
-from PyQt5.QtCore import QPoint, pyqtSignal
 import chessGraphics
-
 
 class ChessPiece(QGraphicsItem):
     def __init__(self, name, x, y, variant, boardSet, UI):
@@ -30,20 +27,6 @@ class ChessPiece(QGraphicsItem):
 
         imgPath = f":/{self.color}{self.variant}/{self.name.lower()}"
         self.image = QImage(imgPath)
-
-        match self.name.lower():
-            case 'r':
-                self.rook()
-            case 'n':
-                self.knight()
-            case 'b':
-                self.bishop()
-            case 'q':
-                self.queen()
-            case 'k':
-                self.king()
-            case 'p':
-                self.pawn()
 
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:

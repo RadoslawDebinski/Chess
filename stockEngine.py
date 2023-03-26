@@ -22,7 +22,6 @@ class StockEngine():
         board = self.engine.get_board_visual()
         board = board.translate({ord(i): None for i in '+-|'})
         board = board.translate({ord('\n'): None})
-        print(board)
         i = 0
         j = 1
         pureBoard = []

@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1108</width>
+    <width>1213</width>
     <height>985</height>
    </rect>
   </property>
@@ -17,10 +17,10 @@
    <widget class="QPushButton" name="SubmitButton">
     <property name="geometry">
      <rect>
-      <x>850</x>
-      <y>870</y>
+      <x>880</x>
+      <y>910</y>
       <width>251</width>
-      <height>81</height>
+      <height>51</height>
      </rect>
     </property>
     <property name="text">
@@ -30,18 +30,18 @@
    <widget class="QTextEdit" name="textEdit">
     <property name="geometry">
      <rect>
-      <x>10</x>
-      <y>870</y>
+      <x>20</x>
+      <y>910</y>
       <width>831</width>
-      <height>81</height>
+      <height>51</height>
      </rect>
     </property>
    </widget>
    <widget class="QPushButton" name="ReverseButton">
     <property name="geometry">
      <rect>
-      <x>850</x>
-      <y>540</y>
+      <x>880</x>
+      <y>550</y>
       <width>251</width>
       <height>71</height>
      </rect>
@@ -55,8 +55,8 @@
      <rect>
       <x>10</x>
       <y>10</y>
-      <width>831</width>
-      <height>851</height>
+      <width>851</width>
+      <height>891</height>
      </rect>
     </property>
     <property name="title">
@@ -66,8 +66,8 @@
    <widget class="QGroupBox" name="ClockBox1">
     <property name="geometry">
      <rect>
-      <x>850</x>
-      <y>10</y>
+      <x>880</x>
+      <y>20</y>
       <width>251</width>
       <height>251</height>
      </rect>
@@ -79,8 +79,8 @@
    <widget class="QGroupBox" name="ClockBox2">
     <property name="geometry">
      <rect>
-      <x>850</x>
-      <y>270</y>
+      <x>880</x>
+      <y>280</y>
       <width>251</width>
       <height>261</height>
      </rect>
