@@ -49,4 +49,9 @@
         <file alias="1234">1234Label.png</file>
     </qresource>
 
+    <qresource prefix="/hint">
+        <file alias="full">hint.png</file>
+        <file alias="transparent">hintTrans.png</file>
+    </qresource>
+
 </RCC>

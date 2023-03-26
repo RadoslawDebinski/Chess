@@ -18,6 +18,7 @@ class ChessBoard(QGraphicsScene):
 
         cordX = 0
         cordY = 0
+        # Locating pieces on board
         for pieceType in self.boardSet:
             chessPiece = ChessPiece(pieceType, cordX, cordY, self.variant, self.boardSet, UI)
             self.chessPieces.append(chessPiece)
@@ -26,9 +27,6 @@ class ChessBoard(QGraphicsScene):
             if cordX == 8:
                 cordX = 0
                 cordY += 1
-
-            # Connect the releasedSignal of the ChessPiece to the on_piece_released slot in the UI
-            # chessPiece.releasedSignal.connect(self.parent().on_piece_released)
 
     def mousePressEvent(self, event):
         if event.button() == Qt.RightButton:

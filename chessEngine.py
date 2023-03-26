@@ -9,7 +9,15 @@ class ChessEngine:
         self.moveLongNot = ''
         self.moveShortNot = ''
         self.side = ''
-        self.validMoves = np.empty([2, 1], dtype=int)
+        self.validMoves = None
+        self.validMovesFrom = np.array([0, 0])
+        self.validMovesTo = np.array([0, 0])
+
+    def getValidMovesFrom(self):
+        return self.validMovesFrom
+
+    def getValidMovesTo(self):
+        return self.validMovesTo
 
     def isValid(self, text, side):
         self.moveShortNot = text
@@ -20,9 +28,10 @@ class ChessEngine:
         self.genValidMoves()
 
     def genValidMoves(self):
+        # calling functions for each piece on board and adding valid moves to list
         for r in range(len(self.squareSet)):
             for c in range(len(self.squareSet[r])):
-                match self.squareSet[r][c]:
+                match self.squareSet[r][c].lower():
                     case 'r':
                         self.rook(r, c)
                     case 'n':
@@ -46,10 +55,13 @@ class ChessEngine:
                 if 0 <= endRow < 8 and 0 <= endCol < 8:  # on board
                     endPiece = self.squareSet[endRow][endCol]
                     if endPiece == ' ':  # empty space valid
-                        self.validMoves[0] = np.append(self.validMoves[0], [r, c]), self.validMoves[1] = np.append(self.validMoves[1], [endRow, endCol])
-                    elif (endPiece.islower() and self.side == 'l') or (endPiece.isupper() and self.side != 'l'):
+                        self.validMovesFrom = np.vstack((self.validMovesFrom, [r, c]))
+                        self.validMovesTo = np.vstack((self.validMovesTo, [endRow, endCol]))
+                    elif (endPiece.islower() and self.side == 'l' and self.squareSet[r][c].isupper()) or (
+                            endPiece.isupper() and self.side != 'l' and self.squareSet[r][c].islower()):
                         # enemy piece is valid
-                        self.validMoves[0] = np.append(self.validMoves[0], [r, c]), self.validMoves[1] = np.append(self.validMoves[1], [endRow, endCol])
+                        self.validMovesFrom = np.vstack((self.validMovesFrom, [r, c]))
+                        self.validMovesTo = np.vstack((self.validMovesTo, [endRow, endCol]))
                         break
                     else:  # friendly piece invalid
                         break
@@ -64,10 +76,13 @@ class ChessEngine:
             if 0 <= endRow < 8 and 0 <= endCol < 8:  # on board
                 endPiece = self.squareSet[endRow][endCol]
                 if endPiece == ' ':  # empty space valid
-                    self.validMoves[0] = np.append(self.validMoves[0], [r, c]), self.validMoves[1] = np.append(self.validMoves[1], [endRow, endCol])
-                elif (endPiece.islower() and self.side == 'l') or (endPiece.isupper() and self.side != 'l'):
+                    self.validMovesFrom = np.vstack((self.validMovesFrom, [r, c]))
+                    self.validMovesTo = np.vstack((self.validMovesTo, [endRow, endCol]))
+                elif (endPiece.islower() and self.side == 'l' and self.squareSet[r][c].isupper()) or (
+                        endPiece.isupper() and self.side != 'l' and self.squareSet[r][c].islower()):
                     # enemy piece is valid
-                    self.validMoves[0] = np.append(self.validMoves[0], [r, c]), self.validMoves[1] = np.append(self.validMoves[1], [endRow, endCol])
+                    self.validMovesFrom = np.vstack((self.validMovesFrom, [r, c]))
+                    self.validMovesTo = np.vstack((self.validMovesTo, [endRow, endCol]))
                     break
                 else:  # friendly piece invalid
                     break
@@ -83,10 +98,13 @@ class ChessEngine:
                 if 0 <= endRow < 8 and 0 <= endCol < 8:  # on board
                     endPiece = self.squareSet[endRow][endCol]
                     if endPiece == ' ':  # empty space valid
-                        self.validMoves[0] = np.append(self.validMoves[0], [r, c]), self.validMoves[1] = np.append(self.validMoves[1], [endRow, endCol])
-                    elif (endPiece.islower() and self.side == 'l') or (endPiece.isupper() and self.side != 'l'):
+                        self.validMovesFrom = np.vstack((self.validMovesFrom, [r, c]))
+                        self.validMovesTo = np.vstack((self.validMovesTo, [endRow, endCol]))
+                    elif (endPiece.islower() and self.side == 'l' and self.squareSet[r][c].isupper()) or (
+                            endPiece.isupper() and self.side != 'l' and self.squareSet[r][c].islower()):
                         # enemy piece is valid
-                        self.validMoves[0] = np.append(self.validMoves[0], [r, c]), self.validMoves[1] = np.append(self.validMoves[1], [endRow, endCol])
+                        self.validMovesFrom = np.vstack((self.validMovesFrom, [r, c]))
+                        self.validMovesTo = np.vstack((self.validMovesTo, [endRow, endCol]))
                         break
                     else:  # friendly piece invalid
                         break
@@ -105,39 +123,47 @@ class ChessEngine:
             if 0 <= endRow < 8 and 0 <= endCol < 8:  # on board
                 endPiece = self.squareSet[endRow][endCol]
                 if endPiece == ' ':  # empty space valid
-                    self.validMoves[0] = np.append(self.validMoves[0], [r, c]), self.validMoves[1] = np.append(self.validMoves[1], [endRow, endCol])
-                elif (endPiece.islower() and self.side == 'l') or (endPiece.isupper() and self.side != 'l'):
+                    self.validMovesFrom = np.vstack((self.validMovesFrom, [r, c]))
+                    self.validMovesTo = np.vstack((self.validMovesTo, [endRow, endCol]))
+                elif (endPiece.islower() and self.side == 'l' and self.squareSet[r][c].isupper()) or (
+                        endPiece.isupper() and self.side != 'l' and self.squareSet[r][c].islower()):
                     # enemy piece is valid
-                    self.validMoves[0] = np.append(self.validMoves[0], [r, c]), self.validMoves[1] = np.append(self.validMoves[1], [endRow, endCol])
-                    break
-                else:  # friendly piece invalid
-                    break
+                    self.validMovesFrom = np.vstack((self.validMovesFrom, [r, c]))
+                    self.validMovesTo = np.vstack((self.validMovesTo, [endRow, endCol]))
             else:  # out of board
                 break
 
     def pawn(self, r, c):
         if self.side == 'l':  # light pawn moves
             if self.squareSet[r - 1][c] == ' ':
-                self.validMoves[0] = np.append(self.validMoves[0], [r, c]), self.validMoves[1] = np.append(self.validMoves[1], [r - 1, c])
+                self.validMovesFrom = np.vstack((self.validMovesFrom, [r, c]))
+                self.validMovesTo = np.vstack((self.validMovesTo, [r - 1, c]))
                 if r == 6 and self.squareSet[r - 2][c] == ' ':
-                    self.validMoves[0] = np.append(self.validMoves[0], [r, c]), self.validMoves[1] = np.append(self.validMoves[1], [r - 2, c])
+                    self.validMovesFrom = np.vstack((self.validMovesFrom, [r, c]))
+                    self.validMovesTo = np.vstack((self.validMovesTo, [r - 2, c]))
             if c - 1 >= 0:  # capture to the left
-                if self.squareSet[r - 1][c - 1].islower():  # enemy piece to capture
-                    self.validMoves[0] = np.append(self.validMoves[0], [r, c]), self.validMoves[1] = np.append(self.validMoves[1], [r - 1, c - 1])
+                if self.squareSet[r - 1][c - 1].islower() and self.squareSet[r][c].isupper():  # enemy piece to capture
+                    self.validMovesFrom = np.vstack((self.validMovesFrom, [r, c]))
+                    self.validMovesTo = np.vstack((self.validMovesTo, [r - 1, c - 1]))
             if c + 1 <= 7:  # capture to the right
-                if self.squareSet[r - 1][c + 1].islower():  # enemy piece to capture
-                    self.validMoves[0] = np.append(self.validMoves[0], [r, c]), self.validMoves[1] = np.append(self.validMoves[1], [r - 1, c + 1])
+                if self.squareSet[r - 1][c + 1].islower() and self.squareSet[r][c].isupper():  # enemy piece to capture
+                    self.validMovesFrom = np.vstack((self.validMovesFrom, [r, c]))
+                    self.validMovesTo = np.vstack((self.validMovesTo, [r - 1, c + 1]))
         else:  # dark pawn moves
             if self.squareSet[r + 1][c] == ' ':
-                self.validMoves[0] = np.append(self.validMoves[0], [r, c]), self.validMoves[1] = np.append(self.validMoves[1], [r + 1, c])
+                self.validMovesFrom = np.vstack((self.validMovesFrom, [r, c]))
+                self.validMovesTo = np.vstack((self.validMovesTo, [r + 1, c]))
                 if r == 1 and self.squareSet[r + 2][c] == ' ':
-                    self.validMoves[0] = np.append(self.validMoves[0], [r, c]), self.validMoves[1] = np.append(self.validMoves[1], [r + 2, c])
+                    self.validMovesFrom = np.vstack((self.validMovesFrom, [r, c]))
+                    self.validMovesTo = np.vstack((self.validMovesTo, [r + 2, c]))
             if c - 1 >= 0:  # capture to the left
-                if self.squareSet[r + 1][c - 1].isupper:  # enemy piece to capture
-                    self.validMoves[0] = np.append(self.validMoves[0], [r, c]), self.validMoves[1] = np.append(self.validMoves[1], [r + 1, c - 1])
+                if self.squareSet[r + 1][c - 1].isupper and self.squareSet[r][c].islower():  # enemy piece to capture
+                    self.validMovesFrom = np.vstack((self.validMovesFrom, [r, c]))
+                    self.validMovesTo = np.vstack((self.validMovesTo, [r + 1, c - 1]))
             if c + 1 <= 7:  # capture to the right
-                if self.squareSet[r + 1][c + 1].isupper():  # enemy piece to capture
-                    self.validMoves[0] = np.append(self.validMoves[0], [r, c]), self.validMoves[1] = np.append(self.validMoves[1], [r + 1, c + 1])
+                if self.squareSet[r + 1][c + 1].isupper() and self.squareSet[r][c].islower():  # enemy piece to capture
+                    self.validMovesFrom = np.vstack((self.validMovesFrom, [r, c]))
+                    self.validMovesTo = np.vstack((self.validMovesTo, [r + 1, c + 1]))
 
     def move(self):
         pass

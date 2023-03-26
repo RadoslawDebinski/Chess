@@ -19,6 +19,11 @@ class UI(QMainWindow):
         super(UI, self).__init__()
         self.side = 'l'
 
+        # Variables for hints
+        hintPath = f":/hint/transparent"
+        self.pixmap = QPixmap(hintPath)
+        self.hints = []
+
         # Load the ui file
         uic.loadUi("loadui.ui", self)
         self.setWindowTitle("Chess Game")
@@ -85,6 +90,24 @@ class UI(QMainWindow):
 
         # Show the app
         self.show()
+
+    def showHints(self, hintTo):
+        # Clear any previously shown hints
+        for hint in self.hints:
+            hint.hide()
+        self.hints = []
+
+        # Create a QLabel for each hint and add it to the view
+        for hint_coord in hintTo:
+            hint_label = QLabel(self.view)
+            hint_label.setPixmap(self.pixmap)
+            hint_label.setGeometry(QRect(hint_coord[1] * 100 + 20, hint_coord[0] * 100 + 20, 60, 60))
+            hint_label.show()
+            self.hints.append(hint_label)
+
+    def hideHints(self):
+        for hint in self.hints:
+            hint.hide()
 
     def onSubmit(self):
         # Get the text from the textEdit widget
