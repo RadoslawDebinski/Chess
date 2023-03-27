@@ -83,11 +83,6 @@ class ChessEngine:
                     # enemy piece is valid
                     self.validMovesFrom = np.vstack((self.validMovesFrom, [r, c]))
                     self.validMovesTo = np.vstack((self.validMovesTo, [endRow, endCol]))
-                    break
-                else:  # friendly piece invalid
-                    break
-            else:  # out of board
-                break
 
     def bishop(self, r, c):
         directions = ((-1, -1), (-1, 1), (1, -1), (1, 1))
@@ -165,5 +160,8 @@ class ChessEngine:
                     self.validMovesFrom = np.vstack((self.validMovesFrom, [r, c]))
                     self.validMovesTo = np.vstack((self.validMovesTo, [r + 1, c + 1]))
 
-    def move(self):
-        pass
+    def move(self, startRow, startCol, endRow, endCol):
+        temp = self.squareSet[endRow][endCol]
+        self.squareSet[endRow][endCol] = self.squareSet[startRow][startCol]
+        self.squareSet[startRow][startCol] = temp
+        return list(np.array(self.squareSet).flatten())

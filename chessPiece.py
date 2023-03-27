@@ -20,6 +20,7 @@ class ChessPiece(QGraphicsItem):
         self.color = ''
         self.image = QImage()
         self.setFlag(QGraphicsItem.ItemIsMovable)
+        self.movesTo = []
 
         # Setting piece color by letter size
         if self.name == ' ':
@@ -51,10 +52,10 @@ class ChessPiece(QGraphicsItem):
                     fromIdx.append(i)
                 i += 1
             # Generating all valid coordinates for piece move
-            movesTo = engine.getValidMovesTo()
-            movesTo = np.take(movesTo, fromIdx, axis=0)
+            self.movesTo = engine.getValidMovesTo()
+            self.movesTo = np.take(self.movesTo, fromIdx, axis=0)
             # Showing hints for user
-            self.UI.showHints(movesTo)
+            self.UI.showHints(self.movesTo)
 
     def mouseReleaseEvent(self, event):
         if event.button() == Qt.LeftButton:
@@ -65,7 +66,7 @@ class ChessPiece(QGraphicsItem):
             self.UI.hideHints()
 
             if self.isValidPosition(newPos):
-                self.UI.on_piece_released(self.boardSet)
+                self.UI.onPieceReleased(self.boardSet)
 
     def isValidPosition(self, newPos):
         # Check if the new position is within the bounds of the chessboard
@@ -74,18 +75,20 @@ class ChessPiece(QGraphicsItem):
 
         prevPosIdx = int(self.windX / 100)
         prevPosIdy = int(self.windY / 100)
-        newPosIdx = int(newPos.x() / 100)
-        newPosIdy = int(newPos.y() / 100)
+        newPosCol = int(newPos.x() / 100)
+        newPosRow = int(newPos.y() / 100)
 
-        newBoardSet = self.boardSet
-        targetField = newBoardSet[newPosIdy * 8 + newPosIdx]
-        newBoardSet[newPosIdy * 8 + newPosIdx] = newBoardSet[prevPosIdy * 8 + prevPosIdx]
-        newBoardSet[prevPosIdy * 8 + prevPosIdx] = targetField
+        where = None
+        try:
+            where = self.movesTo.tolist().index([newPosRow, newPosCol])
+        except ValueError:
+            where = None
 
-        self.boardSet = newBoardSet
+        if where is not None:
+            engine = ChessEngine(self.boardSet)
+            self.boardSet = engine.move(prevPosIdy, prevPosIdx, self.movesTo[where][0], self.movesTo[where][1])
 
         return True
-
 
     def boundingRect(self):
         return QRectF(self.windX, self.windY, 100, 100)

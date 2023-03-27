@@ -101,7 +101,7 @@ class UI(QMainWindow):
         for hint_coord in hintTo:
             hint_label = QLabel(self.view)
             hint_label.setPixmap(self.pixmap)
-            hint_label.setGeometry(QRect(hint_coord[1] * 100 + 20, hint_coord[0] * 100 + 20, 60, 60))
+            hint_label.setGeometry(QRect(hint_coord[1] * 100 + 23, hint_coord[0] * 100 + 23, 60, 60))
             hint_label.show()
             self.hints.append(hint_label)
 
@@ -121,7 +121,7 @@ class UI(QMainWindow):
             self.textEdit.clear()
             self.textEdit.setText("Unacceptable move")
 
-    def on_piece_released(self, boardSet):
+    def onPieceReleased(self, boardSet):
         # print(f"Piece released at position:{int(newPos.x() / 100)}, {int(newPos.y() / 100)}")
         self.boardSet = boardSet
         self.view.setScene(ChessBoard(self.boardSet, self.variant, self))
