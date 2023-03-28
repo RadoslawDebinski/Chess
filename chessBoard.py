@@ -9,7 +9,7 @@ class ChessBoard(QGraphicsScene):
     # Add this signal definition
     rightClicked = pyqtSignal(QPointF)
 
-    def __init__(self, boardset, variant, UI):
+    def __init__(self, boardset, variant, UI, GS):
         super().__init__()
         self.boardSet = boardset
         self.setSceneRect(0, 0, 800, 800)
@@ -20,7 +20,7 @@ class ChessBoard(QGraphicsScene):
         cordY = 0
         # Locating pieces on board
         for pieceType in self.boardSet:
-            chessPiece = ChessPiece(pieceType, cordX, cordY, self.variant, self.boardSet, UI)
+            chessPiece = ChessPiece(pieceType, cordX, cordY, self.variant, self.boardSet, UI, GS)
             self.chessPieces.append(chessPiece)
             self.addItem(chessPiece)
             cordX += 1

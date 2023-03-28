@@ -7,7 +7,7 @@ import numpy as np
 
 
 class ChessPiece(QGraphicsItem):
-    def __init__(self, name, x, y, variant, boardSet, UI):
+    def __init__(self, name, x, y, variant, boardSet, UI, GS):
         super().__init__()
         self.UI = UI
         self.name = name
@@ -19,8 +19,9 @@ class ChessPiece(QGraphicsItem):
         self.boardSet = boardSet
         self.color = ''
         self.image = QImage()
-        self.setFlag(QGraphicsItem.ItemIsMovable)
+        self.setFlag(QGraphicsItem.ItemIsMovable, False)
         self.movesTo = []
+        self.GS = GS
 
         # Setting piece color by letter size
         if self.name == ' ':
@@ -36,37 +37,39 @@ class ChessPiece(QGraphicsItem):
         self.image = QImage(imgPath)
 
     def mousePressEvent(self, event):
-        if event.button() == Qt.LeftButton:
-            self.setCursor(Qt.ClosedHandCursor)
-            # Generate list of all valid moves
-            engine = ChessEngine(self.boardSet)
-            engine.isValid("", self.color)
-            movesFrom = engine.getValidMovesFrom()
+        if self.color == self.GS.side:
+            self.setFlag(QGraphicsItem.ItemIsMovable, True)
+            if event.button() == Qt.LeftButton:
+                self.setCursor(Qt.ClosedHandCursor)
+                # Generate list of all valid moves
+                engine = ChessEngine(self.boardSet, self.GS)
+                movesFrom = engine.getValidMovesFrom()
 
-            pieceLoc = np.array([self.y, self.x])
-            i = 0
-            fromIdx = []
-            # Finding indexes of valid moves for our piece
-            for loc in movesFrom:
-                if loc[0] == pieceLoc[0] and loc[1] == pieceLoc[1]:
-                    fromIdx.append(i)
-                i += 1
-            # Generating all valid coordinates for piece move
-            self.movesTo = engine.getValidMovesTo()
-            self.movesTo = np.take(self.movesTo, fromIdx, axis=0)
-            # Showing hints for user
-            self.UI.showHints(self.movesTo)
+                pieceLoc = np.array([self.y, self.x])
+                i = 0
+                fromIdx = []
+                # Finding indexes of valid moves for our piece
+                for loc in movesFrom:
+                    if loc[0] == pieceLoc[0] and loc[1] == pieceLoc[1]:
+                        fromIdx.append(i)
+                    i += 1
+                # Generating all valid coordinates for piece move
+                self.movesTo = engine.getValidMovesTo()
+                self.movesTo = np.take(self.movesTo, fromIdx, axis=0)
+                # Showing hints for user
+                self.UI.showHints(self.movesTo)
 
     def mouseReleaseEvent(self, event):
-        if event.button() == Qt.LeftButton:
-            self.setCursor(Qt.OpenHandCursor)
-            # Move the chess piece to the new position
-            newPos = event.scenePos()
-            # Hiding user hints
-            self.UI.hideHints()
+        if self.color == self.GS.side:
+            if event.button() == Qt.LeftButton:
+                self.setCursor(Qt.OpenHandCursor)
+                # Move the chess piece to the new position
+                newPos = event.scenePos()
+                # Hiding user hints
+                self.UI.hideHints()
 
-            if self.isValidPosition(newPos):
-                self.UI.onPieceReleased(self.boardSet)
+                if self.isValidPosition(newPos):
+                    self.UI.onPieceReleased(self.boardSet)
 
     def isValidPosition(self, newPos):
         # Check if the new position is within the bounds of the chessboard
@@ -85,7 +88,7 @@ class ChessPiece(QGraphicsItem):
             where = None
 
         if where is not None:
-            engine = ChessEngine(self.boardSet)
+            engine = ChessEngine(self.boardSet, self.GS)
             self.boardSet = engine.move(prevPosIdy, prevPosIdx, self.movesTo[where][0], self.movesTo[where][1])
 
         return True

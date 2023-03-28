@@ -10,6 +10,7 @@ from chessBoard import ChessBoard
 from stockEngine import StockEngine
 from chessEngine import ChessEngine
 import chessGraphics
+from gamesStatus import GameStatus
 
 stockPath = "C:\\Users\\radek\\Downloads\\stockfish-11-win\\stockfish-11-win\\Windows\\stockfish_20011801_x64.exe"
 
@@ -17,7 +18,6 @@ stockPath = "C:\\Users\\radek\\Downloads\\stockfish-11-win\\stockfish-11-win\\Wi
 class UI(QMainWindow):
     def __init__(self, variant):
         super(UI, self).__init__()
-        self.side = 'l'
 
         # Variables for hints
         hintPath = f":/hint/transparent"
@@ -53,9 +53,11 @@ class UI(QMainWindow):
         boardSet = engine.getPureBoard()
         self.boardSet = boardSet
 
+        self.GS = GameStatus()
+
         # Set board appearance
         self.view = QGraphicsView(self)
-        board = ChessBoard(self.boardSet, self.variant, self)
+        board = ChessBoard(self.boardSet, self.variant, self, self.GS)
         self.view.setScene(board)
         self.view.setRenderHint(QPainter.Antialiasing)
         imgPath = f":/board/{self.variant}"
@@ -98,12 +100,12 @@ class UI(QMainWindow):
         self.hints = []
 
         # Create a QLabel for each hint and add it to the view
-        for hint_coord in hintTo:
-            hint_label = QLabel(self.view)
-            hint_label.setPixmap(self.pixmap)
-            hint_label.setGeometry(QRect(hint_coord[1] * 100 + 23, hint_coord[0] * 100 + 23, 60, 60))
-            hint_label.show()
-            self.hints.append(hint_label)
+        for hintCoord in hintTo:
+            hintLabel = QLabel(self.view)
+            hintLabel.setPixmap(self.pixmap)
+            hintLabel.setGeometry(QRect(hintCoord[1] * 100 + 23, hintCoord[0] * 100 + 23, 60, 60))
+            hintLabel.show()
+            self.hints.append(hintLabel)
 
     def hideHints(self):
         for hint in self.hints:
@@ -113,7 +115,7 @@ class UI(QMainWindow):
         # Get the text from the textEdit widget
         text = self.textEdit.toPlainText()
         engine = ChessEngine(self.boardSet)
-        isValid = engine.isValid(text, self.side)
+        isValid = engine.isValid(text, self.GS.side)
         if isValid:
             engine.move()
             self.textEdit.clear()
@@ -124,7 +126,7 @@ class UI(QMainWindow):
     def onPieceReleased(self, boardSet):
         # print(f"Piece released at position:{int(newPos.x() / 100)}, {int(newPos.y() / 100)}")
         self.boardSet = boardSet
-        self.view.setScene(ChessBoard(self.boardSet, self.variant, self))
+        self.view.setScene(ChessBoard(self.boardSet, self.variant, self, self.GS))
 
     def showContextMenu(self, pos):
         # Create right-click menu with rotate options

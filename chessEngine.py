@@ -2,21 +2,24 @@ import numpy as np
 
 
 class ChessEngine:
-    def __init__(self, boardSet):
+    def __init__(self, boardSet, GS):
         self.boardSet = boardSet
         n = 8
         self.squareSet = [self.boardSet[i:i + n] for i in range(0, len(self.boardSet), n)]
         self.moveLongNot = ''
         self.moveShortNot = ''
-        self.side = ''
+        self.GS = GS
+        self.side = self.GS.side
         self.validMoves = None
         self.validMovesFrom = np.array([0, 0])
         self.validMovesTo = np.array([0, 0])
 
     def getValidMovesFrom(self):
+        self.genValidMoves()
         return self.validMovesFrom
 
     def getValidMovesTo(self):
+        self.genValidMoves()
         return self.validMovesTo
 
     def isValid(self, text, side):
@@ -125,8 +128,7 @@ class ChessEngine:
                     # enemy piece is valid
                     self.validMovesFrom = np.vstack((self.validMovesFrom, [r, c]))
                     self.validMovesTo = np.vstack((self.validMovesTo, [endRow, endCol]))
-            else:  # out of board
-                break
+
 
     def pawn(self, r, c):
         if self.side == 'l':  # light pawn moves
@@ -161,6 +163,7 @@ class ChessEngine:
                     self.validMovesTo = np.vstack((self.validMovesTo, [r + 1, c + 1]))
 
     def move(self, startRow, startCol, endRow, endCol):
+        self.GS.changeSide()
         temp = self.squareSet[endRow][endCol]
         self.squareSet[endRow][endCol] = self.squareSet[startRow][startCol]
         self.squareSet[startRow][startCol] = temp
