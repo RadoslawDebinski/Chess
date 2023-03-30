@@ -154,7 +154,7 @@ class UI(QMainWindow):
             self.view.setBackgroundBrush(QBrush(pixmap))
 
         # Reload the ChessBoard with the new background color
-        self.view.setScene(ChessBoard(self.boardSet, self.variant, self))
+        self.view.setScene(ChessBoard(self.boardSet, self.variant, self, self.GS))
 
 
 # Initialize the App

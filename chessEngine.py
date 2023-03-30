@@ -14,8 +14,13 @@ class ChessEngine:
         self.validMovesFrom = np.array([0, 0])
         self.validMovesTo = np.array([0, 0])
         # Kings location for castling, check and mate
-        # ...
-        # ...
+        self.kingLLoc = []
+        self.kingDLoc = []
+        # Separated valid moves
+        self.validMovesFromDark = np.array([0, 0])
+        self.validMovesToDark = np.array([0, 0])
+        self.validMovesFromLight = np.array([0, 0])
+        self.validMovesToLight = np.array([0, 0])
 
     def getValidMovesFrom(self):
         self.genValidMoves()
@@ -47,9 +52,21 @@ class ChessEngine:
                     case 'q':
                         self.queen(r, c)
                     case 'k':
+                        if self.squareSet[r][c].islower():
+                            self.kingDLoc = [r, c]
+                        else:
+                            self.kingLLoc = [r, c]
                         self.king(r, c)
                     case 'p':
                         self.pawn(r, c)
+        # Separated list for dark and light
+        self.separateMoves()
+        # Short castling check
+        self.shortCastling(self.kingLLoc[0], self.kingLLoc[1])
+        self.shortCastling(self.kingDLoc[0], self.kingDLoc[1])
+        # Long castling check
+        self.longCastling(self.kingLLoc[0], self.kingLLoc[1])
+        self.longCastling(self.kingDLoc[0], self.kingDLoc[1])
         return True
 
     def rook(self, r, c):
@@ -131,13 +148,9 @@ class ChessEngine:
                     # enemy piece is valid
                     self.validMovesFrom = np.vstack((self.validMovesFrom, [r, c]))
                     self.validMovesTo = np.vstack((self.validMovesTo, [endRow, endCol]))
-        # Short castling check
-        self.shortCastling(r, c)
-        # Long castling
-        self.longCastling(r, c)
 
     def pawn(self, r, c):
-        if self.side == 'l':  # light pawn moves
+        if self.squareSet[r][c].isupper():  # light pawn moves
             if self.squareSet[r - 1][c] == ' ':
                 self.validMovesFrom = np.vstack((self.validMovesFrom, [r, c]))
                 self.validMovesTo = np.vstack((self.validMovesTo, [r - 1, c]))
@@ -189,6 +202,15 @@ class ChessEngine:
                     self.validMovesFrom = np.vstack((self.validMovesFrom, [r, c]))
                     self.validMovesTo = np.vstack((self.validMovesTo, [r + 1, c + 1]))
 
+    def separateMoves(self):
+        for i, j in zip(self.validMovesFrom, self.validMovesTo):
+            if self.squareSet[i[0]][i[1]].islower():
+                self.validMovesFromDark = np.vstack((self.validMovesFromDark, i))
+                self.validMovesToDark = np.vstack((self.validMovesToDark, j))
+            elif self.squareSet[i[0]][i[1]].isupper():
+                self.validMovesFromLight = np.vstack((self.validMovesFromLight, i))
+                self.validMovesToLight = np.vstack((self.validMovesToLight, j))
+
     def shortCastling(self, r, c):
         kingNotAvailable = []
         try:
@@ -206,21 +228,25 @@ class ChessEngine:
                     path = [self.squareSet[r][c + 1], self.squareSet[r][c + 2]]
                     clearPath = all(ele == ' ' for ele in path)
                     if clearPath:
-                        pathSafe = self.shortCastlingPathSafety(r, c)
-                        if pathSafe:
+                        if self.shortCastlingPathSafety(r, c):
                             self.validMovesFrom = np.vstack((self.validMovesFrom, [r, c]))
                             self.validMovesTo = np.vstack((self.validMovesTo, [r, c + 2]))
 
     def shortCastlingPathSafety(self, r, c):
         fColCords = [r, c + 1]
         gColCords = [r, c + 2]
-        pathSafe = []
-        try:
-            pathSafe = self.GS.stackTo.index(fColCords)
-            pathSafe = self.GS.stackTo.index(gColCords)
-        except ValueError:
-            pathSafe = []
-        return pathSafe
+
+        if self.side == 'l':
+            fSafe = np.any(np.all(np.where(fColCords == self.validMovesToDark, True, False), axis=1))
+            gSafe = np.any(np.all(np.where(gColCords == self.validMovesToDark, True, False), axis=1))
+            if fSafe or gSafe:
+                return False
+        else:
+            fSafe = np.any(np.all(np.where(fColCords == self.validMovesToLight, True, False), axis=1))
+            gSafe = np.any(np.all(np.where(gColCords == self.validMovesToLight, True, False), axis=1))
+            if fSafe or gSafe:
+                return False
+        return True
 
     def longCastling(self, r, c):
         kingNotAvailable = []
@@ -238,9 +264,25 @@ class ChessEngine:
                     path = [self.squareSet[r][c - 1], self.squareSet[r][c - 2], self.squareSet[r][c - 3]]
                     clearPath = all(ele == ' ' for ele in path)
                     if clearPath:
-                        # !!!!!!!!!!!!!!!!!!!!!!!
-                        self.validMovesFrom = np.vstack((self.validMovesFrom, [r, c]))
-                        self.validMovesTo = np.vstack((self.validMovesTo, [r, c - 2]))
+                        if self.longCastlingPathSafety(r, c):
+                            self.validMovesFrom = np.vstack((self.validMovesFrom, [r, c]))
+                            self.validMovesTo = np.vstack((self.validMovesTo, [r, c - 2]))
+
+    def longCastlingPathSafety(self, r, c):
+        cColCords = [r, c - 1]
+        dColCords = [r, c - 2]
+
+        if self.side == 'l':
+            fSafe = np.any(np.all(np.where(cColCords == self.validMovesToDark, True, False), axis=1))
+            gSafe = np.any(np.all(np.where(dColCords == self.validMovesToDark, True, False), axis=1))
+            if fSafe or gSafe:
+                return False
+        else:
+            fSafe = np.any(np.all(np.where(cColCords == self.validMovesToLight, True, False), axis=1))
+            gSafe = np.any(np.all(np.where(dColCords == self.validMovesToLight, True, False), axis=1))
+            if fSafe or gSafe:
+                return False
+        return True
 
     def enPassantReport(self, startRow, startCol, endRow, endCol):
         # En passant availability for light
