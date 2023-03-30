@@ -22,14 +22,6 @@ class ChessEngine:
         self.validMovesFromLight = np.array([0, 0])
         self.validMovesToLight = np.array([0, 0])
 
-    def getValidMovesFrom(self):
-        self.genValidMoves()
-        return self.validMovesFrom
-
-    def getValidMovesTo(self):
-        self.genValidMoves()
-        return self.validMovesTo
-
     def isValid(self, text, side):
         self.moveShortNot = text
         # here translation from short to long !!!
@@ -67,13 +59,14 @@ class ChessEngine:
         # Long castling check
         self.longCastling(self.kingLLoc[0], self.kingLLoc[1])
         self.longCastling(self.kingDLoc[0], self.kingDLoc[1])
-        # Light king check
-        self.GS.checkKingL = self.checkCheck(self.kingLLoc[0], self.kingLLoc[1])
-        # Dark king check
-        self.GS.checkKingD = self.checkCheck(self.kingDLoc[0], self.kingDLoc[1])
         return True
 
+    #############################################
+    #self.side == 'l' <----> startPiece.isupper()
+    #self.side != 'l' <----> startPiece.islower()
+    #############################################
     def rook(self, r, c):
+        startPiece = self.squareSet[r][c]
         directions = ((-1, 0), (0, -1), (1, 0), (0, 1))
         for d in directions:
             for i in range(1, 8):
@@ -84,8 +77,8 @@ class ChessEngine:
                     if endPiece == ' ':  # empty space valid
                         self.validMovesFrom = np.vstack((self.validMovesFrom, [r, c]))
                         self.validMovesTo = np.vstack((self.validMovesTo, [endRow, endCol]))
-                    elif (endPiece.islower() and self.side == 'l' and self.squareSet[r][c].isupper()) or (
-                            endPiece.isupper() and self.side != 'l' and self.squareSet[r][c].islower()):
+                    elif (endPiece.islower() and startPiece.isupper() and self.squareSet[r][c].isupper()) or (
+                            endPiece.isupper() and startPiece.islower() and self.squareSet[r][c].islower()):
                         # enemy piece is valid
                         self.validMovesFrom = np.vstack((self.validMovesFrom, [r, c]))
                         self.validMovesTo = np.vstack((self.validMovesTo, [endRow, endCol]))
@@ -96,6 +89,7 @@ class ChessEngine:
                     break
 
     def knight(self, r, c):
+        startPiece = self.squareSet[r][c]
         knightMoves = ((-2, -1), (-2, 1), (-1, -2), (-1, 2), (1, -2), (1, 2), (2, -1), (2, 1))
         for m in knightMoves:
             endRow = r + m[0]
@@ -105,13 +99,14 @@ class ChessEngine:
                 if endPiece == ' ':  # empty space valid
                     self.validMovesFrom = np.vstack((self.validMovesFrom, [r, c]))
                     self.validMovesTo = np.vstack((self.validMovesTo, [endRow, endCol]))
-                elif (endPiece.islower() and self.side == 'l' and self.squareSet[r][c].isupper()) or (
-                        endPiece.isupper() and self.side != 'l' and self.squareSet[r][c].islower()):
+                elif (endPiece.islower() and startPiece.isupper() and self.squareSet[r][c].isupper()) or (
+                        endPiece.isupper() and startPiece.islower() and self.squareSet[r][c].islower()):
                     # enemy piece is valid
                     self.validMovesFrom = np.vstack((self.validMovesFrom, [r, c]))
                     self.validMovesTo = np.vstack((self.validMovesTo, [endRow, endCol]))
 
     def bishop(self, r, c):
+        startPiece = self.squareSet[r][c]
         directions = ((-1, -1), (-1, 1), (1, -1), (1, 1))
         for d in directions:
             for i in range(1, 8):
@@ -122,8 +117,8 @@ class ChessEngine:
                     if endPiece == ' ':  # empty space valid
                         self.validMovesFrom = np.vstack((self.validMovesFrom, [r, c]))
                         self.validMovesTo = np.vstack((self.validMovesTo, [endRow, endCol]))
-                    elif (endPiece.islower() and self.side == 'l' and self.squareSet[r][c].isupper()) or (
-                            endPiece.isupper() and self.side != 'l' and self.squareSet[r][c].islower()):
+                    elif (endPiece.islower() and startPiece.isupper() and self.squareSet[r][c].isupper()) or (
+                            endPiece.isupper() and startPiece.islower() and self.squareSet[r][c].islower()):
                         # enemy piece is valid
                         self.validMovesFrom = np.vstack((self.validMovesFrom, [r, c]))
                         self.validMovesTo = np.vstack((self.validMovesTo, [endRow, endCol]))
@@ -138,6 +133,7 @@ class ChessEngine:
         self.bishop(r, c)
 
     def king(self, r, c):
+        startPiece = self.squareSet[r][c]
         kingMoves = ((-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1))
         for i in range(8):
             endRow = r + kingMoves[i][0]
@@ -147,21 +143,25 @@ class ChessEngine:
                 if endPiece == ' ':  # empty space valid
                     self.validMovesFrom = np.vstack((self.validMovesFrom, [r, c]))
                     self.validMovesTo = np.vstack((self.validMovesTo, [endRow, endCol]))
-                elif (endPiece.islower() and self.side == 'l' and self.squareSet[r][c].isupper()) or (
-                        endPiece.isupper() and self.side != 'l' and self.squareSet[r][c].islower()):
+                elif (endPiece.islower() and startPiece.isupper() and self.squareSet[r][c].isupper()) or (
+                        endPiece.isupper() and startPiece.islower() and self.squareSet[r][c].islower()):
                     # enemy piece is valid
                     self.validMovesFrom = np.vstack((self.validMovesFrom, [r, c]))
                     self.validMovesTo = np.vstack((self.validMovesTo, [endRow, endCol]))
 
     def pawn(self, r, c):
         if self.squareSet[r][c].isupper():  # light pawn moves
-            if self.squareSet[r - 1][c] == ' ':
-                self.validMovesFrom = np.vstack((self.validMovesFrom, [r, c]))
-                self.validMovesTo = np.vstack((self.validMovesTo, [r - 1, c]))
-                if r == 6 and self.squareSet[r - 2][c] == ' ':
+            if r - 1 >= 0:
+                if self.squareSet[r - 1][c] == ' ':
                     self.validMovesFrom = np.vstack((self.validMovesFrom, [r, c]))
-                    self.validMovesTo = np.vstack((self.validMovesTo, [r - 2, c]))
-            if c - 1 >= 0:  # capture to the left
+                    self.validMovesTo = np.vstack((self.validMovesTo, [r - 1, c]))
+                    if r - 2 >= 0:
+                        if r == 6 and self.squareSet[r - 2][c] == ' ':
+                            self.validMovesFrom = np.vstack((self.validMovesFrom, [r, c]))
+                            self.validMovesTo = np.vstack((self.validMovesTo, [r - 2, c]))
+            else:  # Promotion
+                self.pawnPromotion(r, c)
+            if c - 1 >= 0 and r - 1 >= 0:  # capture to the left
                 if self.squareSet[r - 1][c - 1].islower() and self.squareSet[r][c].isupper():  # enemy piece to capture
                     self.validMovesFrom = np.vstack((self.validMovesFrom, [r, c]))
                     self.validMovesTo = np.vstack((self.validMovesTo, [r - 1, c - 1]))
@@ -170,7 +170,7 @@ class ChessEngine:
                         and self.squareSet[r][c - 1] == 'p':  # en passant to the left
                     self.validMovesFrom = np.vstack((self.validMovesFrom, [r, c]))
                     self.validMovesTo = np.vstack((self.validMovesTo, [r - 1, c - 1]))
-            if c + 1 <= 7:  # capture to the right
+            if c + 1 <= 7 and r - 1 >= 0:  # capture to the right
                 if self.squareSet[r - 1][c + 1].islower() and self.squareSet[r][c].isupper():  # enemy piece to capture
                     self.validMovesFrom = np.vstack((self.validMovesFrom, [r, c]))
                     self.validMovesTo = np.vstack((self.validMovesTo, [r - 1, c + 1]))
@@ -181,13 +181,17 @@ class ChessEngine:
                     self.validMovesTo = np.vstack((self.validMovesTo, [r - 1, c + 1]))
 
         else:  # dark pawn moves
-            if self.squareSet[r + 1][c] == ' ':
-                self.validMovesFrom = np.vstack((self.validMovesFrom, [r, c]))
-                self.validMovesTo = np.vstack((self.validMovesTo, [r + 1, c]))
-                if r == 1 and self.squareSet[r + 2][c] == ' ':
+            if r + 1 < 8:
+                if self.squareSet[r + 1][c] == ' ':
                     self.validMovesFrom = np.vstack((self.validMovesFrom, [r, c]))
-                    self.validMovesTo = np.vstack((self.validMovesTo, [r + 2, c]))
-            if c - 1 >= 0:  # capture to the left
+                    self.validMovesTo = np.vstack((self.validMovesTo, [r + 1, c]))
+                    if r + 2 < 8:
+                        if r == 1 and self.squareSet[r + 2][c] == ' ':
+                            self.validMovesFrom = np.vstack((self.validMovesFrom, [r, c]))
+                            self.validMovesTo = np.vstack((self.validMovesTo, [r + 2, c]))
+            else:  # Promotion
+                self.pawnPromotion(r, c)
+            if c - 1 >= 0 and r + 1 < 8:  # capture to the left
                 if self.squareSet[r + 1][c - 1].isupper() and self.squareSet[r][c].islower():  # enemy piece to capture
                     self.validMovesFrom = np.vstack((self.validMovesFrom, [r, c]))
                     self.validMovesTo = np.vstack((self.validMovesTo, [r + 1, c - 1]))
@@ -196,7 +200,7 @@ class ChessEngine:
                         and self.squareSet[r][c - 1] == 'P':  # en passant to the left
                     self.validMovesFrom = np.vstack((self.validMovesFrom, [r, c]))
                     self.validMovesTo = np.vstack((self.validMovesTo, [r + 1, c - 1]))
-            if c + 1 <= 7:  # capture to the right
+            if c + 1 <= 7 and r + 1 < 8:  # capture to the right
                 if self.squareSet[r + 1][c + 1].isupper() and self.squareSet[r][c].islower():  # enemy piece to capture
                     self.validMovesFrom = np.vstack((self.validMovesFrom, [r, c]))
                     self.validMovesTo = np.vstack((self.validMovesTo, [r + 1, c + 1]))
@@ -304,15 +308,38 @@ class ChessEngine:
             self.GS.isEnPassantL = [False] * 8
 
     def checkCheck(self, r, c):
+        # Light king
         if self.squareSet[r][c].isupper():
             kingSafe = np.any(np.all(np.where([r, c] == self.validMovesToDark, True, False), axis=1))
             if kingSafe:
                 return True
+        # Dark King
         if self.squareSet[r][c].islower():
             kingSafe = np.any(np.all(np.where([r, c] == self.validMovesToLight, True, False), axis=1))
             if kingSafe:
                 return True
         return False
+
+    def checkMate(self, r, c):
+        # Possibility of moving to unattacked square
+        if True:
+            pass
+            # Possibility of interposing
+            if True:
+                pass
+                # Possibility of capturing threatening piece
+                if True:
+                    pass
+
+    def pawnPromotion(self, r, c):
+        # Light pawn
+        if self.squareSet[r][c].isupper():
+            self.GS.isPromotionL[c] = True
+        # Dark pawn
+        else:
+            self.GS.isPromotionD[c] = True
+
+
 
     def move(self, startRow, startCol, endRow, endCol):
         # Report en passant availability or reset it
@@ -326,6 +353,13 @@ class ChessEngine:
         # Game stack update
         self.GS.stackFrom.append([startRow, startCol])
         self.GS.stackTo.append([endRow, endCol])
+
+        # Update valid moves for checkmate
+        self.genValidMoves()
+        # Light king check update
+        self.GS.checkKingL = self.checkCheck(self.kingLLoc[0], self.kingLLoc[1])
+        # Dark king check update
+        self.GS.checkKingD = self.checkCheck(self.kingDLoc[0], self.kingDLoc[1])
 
         # Next Player
         self.GS.changeSide()

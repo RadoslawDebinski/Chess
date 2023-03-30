@@ -43,7 +43,8 @@ class ChessPiece(QGraphicsItem):
                 self.setCursor(Qt.ClosedHandCursor)
                 # Generate list of all valid moves
                 engine = ChessEngine(self.boardSet, self.GS)
-                movesFrom = engine.getValidMovesFrom()
+                engine.genValidMoves()
+                movesFrom = engine.validMovesFrom
 
                 pieceLoc = np.array([self.y, self.x])
                 i = 0
@@ -54,7 +55,7 @@ class ChessPiece(QGraphicsItem):
                         fromIdx.append(i)
                     i += 1
                 # Generating all valid coordinates for piece move
-                self.movesTo = engine.getValidMovesTo()
+                self.movesTo = engine.validMovesTo
                 self.movesTo = np.take(self.movesTo, fromIdx, axis=0)
                 # Showing hints for user
                 self.UI.showHints(self.movesTo)
@@ -67,7 +68,6 @@ class ChessPiece(QGraphicsItem):
                 newPos = event.scenePos()
                 # Hiding user hints
                 self.UI.hideHints()
-
                 if self.isValidPosition(newPos):
                     self.UI.onPieceReleased(self.boardSet)
 
