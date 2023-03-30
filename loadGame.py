@@ -35,6 +35,10 @@ class UI(QMainWindow):
         self.textEdit = self.findChild(QTextEdit, "textEdit")
         self.submitButton = self.findChild(QPushButton, "SubmitButton")
         self.reverseButton = self.findChild(QPushButton, "ReverseButton")
+        self.checkLight = self.findChild(QPushButton, "pushButton_4")
+        self.checkDark = self.findChild(QPushButton, "pushButton")
+        self.mateLight = self.findChild(QPushButton, "pushButton_3")
+        self.mateDark = self.findChild(QPushButton, "pushButton_2")
 
         # Initial textEdit message
         self.textEdit.setText("Here insert move")
@@ -52,7 +56,7 @@ class UI(QMainWindow):
         engine = StockEngine(stockPath)
         boardSet = engine.getPureBoard()
         self.boardSet = boardSet
-
+        # Initial game status recorder
         self.GS = GameStatus()
 
         # Set board appearance
@@ -123,9 +127,24 @@ class UI(QMainWindow):
             self.textEdit.clear()
             self.textEdit.setText("Unacceptable move")
 
+    def checkMates(self):
+        # self.checkLight.setStyleSheet('QPushButton {background-color: %s}' % QColor(255, 0, 0).name())
+        # self.checkDark.setStyleSheet('QPushButton {background-color: %s}' % QColor(255, 0, 0).name())
+        # self.mateLight.setStyleSheet('QPushButton {background-color: %s}' % QColor(255, 0, 0).name())
+        # self.mateDark.setStyleSheet('QPushButton {background-color: %s}' % QColor(255, 0, 0).name())
+        if self.GS.checkKingL:
+            self.checkLight.setStyleSheet('QPushButton {background-color: %s}' % QColor(255, 0, 0).name())
+        else:
+            self.checkLight.setStyleSheet('QPushButton {background-color: %s}' % QColor(0, 160, 255).name())
+
+        if self.GS.checkKingD:
+            self.checkDark.setStyleSheet('QPushButton {background-color: %s}' % QColor(255, 0, 0).name())
+        else:
+            self.checkDark.setStyleSheet('QPushButton {background-color: %s}' % QColor(0, 160, 255).name())
+
     def onPieceReleased(self, boardSet):
-        # print(f"Piece released at position:{int(newPos.x() / 100)}, {int(newPos.y() / 100)}")
         self.boardSet = boardSet
+        self.checkMates()
         self.view.setScene(ChessBoard(self.boardSet, self.variant, self, self.GS))
 
     def showContextMenu(self, pos):

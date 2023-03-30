@@ -40,8 +40,8 @@
    <widget class="QPushButton" name="ReverseButton">
     <property name="geometry">
      <rect>
-      <x>880</x>
-      <y>550</y>
+      <x>940</x>
+      <y>530</y>
       <width>251</width>
       <height>71</height>
      </rect>
@@ -66,8 +66,8 @@
    <widget class="QGroupBox" name="ClockBox1">
     <property name="geometry">
      <rect>
-      <x>880</x>
-      <y>20</y>
+      <x>940</x>
+      <y>10</y>
       <width>251</width>
       <height>251</height>
      </rect>
@@ -79,14 +79,66 @@
    <widget class="QGroupBox" name="ClockBox2">
     <property name="geometry">
      <rect>
-      <x>880</x>
-      <y>280</y>
+      <x>940</x>
+      <y>260</y>
       <width>251</width>
       <height>261</height>
      </rect>
     </property>
     <property name="title">
      <string>Clock2</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButton">
+    <property name="geometry">
+     <rect>
+      <x>870</x>
+      <y>60</y>
+      <width>61</width>
+      <height>101</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Check</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButton_2">
+    <property name="geometry">
+     <rect>
+      <x>870</x>
+      <y>160</y>
+      <width>61</width>
+      <height>101</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Mate</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButton_3">
+    <property name="geometry">
+     <rect>
+      <x>870</x>
+      <y>800</y>
+      <width>61</width>
+      <height>101</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Mate</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButton_4">
+    <property name="geometry">
+     <rect>
+      <x>870</x>
+      <y>702</y>
+      <width>61</width>
+      <height>101</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Check</string>
     </property>
    </widget>
   </widget>

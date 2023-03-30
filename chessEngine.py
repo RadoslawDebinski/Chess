@@ -67,6 +67,10 @@ class ChessEngine:
         # Long castling check
         self.longCastling(self.kingLLoc[0], self.kingLLoc[1])
         self.longCastling(self.kingDLoc[0], self.kingDLoc[1])
+        # Light king check
+        self.GS.checkKingL = self.checkCheck(self.kingLLoc[0], self.kingLLoc[1])
+        # Dark king check
+        self.GS.checkKingD = self.checkCheck(self.kingDLoc[0], self.kingDLoc[1])
         return True
 
     def rook(self, r, c):
@@ -221,7 +225,6 @@ class ChessEngine:
             rookNotAvailable = []
             try:
                 rookNotAvailable = self.GS.stackFrom.index([r, c + 3])
-                print("hi")
             except ValueError:
                 rookNotAvailable = []
                 if not rookNotAvailable:
@@ -299,6 +302,17 @@ class ChessEngine:
         # En passant light reset
         else:
             self.GS.isEnPassantL = [False] * 8
+
+    def checkCheck(self, r, c):
+        if self.squareSet[r][c].isupper():
+            kingSafe = np.any(np.all(np.where([r, c] == self.validMovesToDark, True, False), axis=1))
+            if kingSafe:
+                return True
+        if self.squareSet[r][c].islower():
+            kingSafe = np.any(np.all(np.where([r, c] == self.validMovesToLight, True, False), axis=1))
+            if kingSafe:
+                return True
+        return False
 
     def move(self, startRow, startCol, endRow, endCol):
         # Report en passant availability or reset it

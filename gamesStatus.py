@@ -6,6 +6,9 @@ class GameStatus:
         # Is pawn available for enPassant
         self.isEnPassantL = [False] * 8
         self.isEnPassantD = [False] * 8
+        # Are king checked
+        self.checkKingL = False
+        self.checkKingD = False
 
     def changeSide(self):
         if self.side == 'l':
