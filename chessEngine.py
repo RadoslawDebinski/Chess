@@ -342,13 +342,27 @@ class ChessEngine:
 
 
     def move(self, startRow, startCol, endRow, endCol):
-        # Report en passant availability or reset it
+        # Report an en Passant availability or reset it
         self.enPassantReport(startRow, startCol, endRow, endCol)
+        # Proceed an en Passant
+        if self.squareSet[endRow][endCol] == ' ' and endCol != startCol \
+                and self.squareSet[startRow][startCol].lower() == 'p':
+            if self.GS.side == 'l':
+                self.squareSet[endRow + 1][endCol] = ' '
+            else:
+                self.squareSet[endRow - 1][endCol] = ' '
+        # Proceed short castling
+        if self.squareSet[startRow][startCol].lower() == 'k' and endCol == startCol + 2:
+            self.squareSet[endRow][endCol - 1] = self.squareSet[endRow][endCol + 1]
+            self.squareSet[endRow][endCol + 1] = ' '
+        # Proceed long castling
+        if self.squareSet[startRow][startCol].lower() == 'k' and endCol == startCol - 2:
+            self.squareSet[endRow][endCol + 1] = self.squareSet[endRow][endCol - 2]
+            self.squareSet[endRow][endCol - 2] = ' '
 
-        # Change figures coordinates start <-> end [temporary]
-        temp = self.squareSet[endRow][endCol]
+        # Always [target = piece] and [start = ' ']
         self.squareSet[endRow][endCol] = self.squareSet[startRow][startCol]
-        self.squareSet[startRow][startCol] = temp
+        self.squareSet[startRow][startCol] = ' '
 
         # Game stack update
         self.GS.stackFrom.append([startRow, startCol])
