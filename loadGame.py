@@ -161,6 +161,7 @@ class UI(QMainWindow):
         self.checkMates()
         self.view.setScene(ChessBoard(self.boardSet, self.variant, self, self.GS))
         # Next Player
+        self.GS.clearStatus()
         self.GS.changeSide()
 
     def showContextMenu(self, pos):
