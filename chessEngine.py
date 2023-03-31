@@ -51,7 +51,7 @@ class ChessEngine:
                         self.king(r, c)
                     case 'p':
                         self.pawn(r, c)
-        # Separated list for dark and light
+        # Separated list for dark and light to check castling
         self.separateMoves()
         # Short castling check
         self.shortCastling(self.kingLLoc[0], self.kingLLoc[1])
@@ -62,8 +62,8 @@ class ChessEngine:
         return True
 
     #############################################
-    #self.side == 'l' <----> startPiece.isupper()
-    #self.side != 'l' <----> startPiece.islower()
+    # self.side == 'l' <----> startPiece.isupper()
+    # self.side != 'l' <----> startPiece.islower()
     #############################################
     def rook(self, r, c):
         startPiece = self.squareSet[r][c]
@@ -321,25 +321,59 @@ class ChessEngine:
         return False
 
     def checkMate(self, r, c):
+        # Is king under attack
+        attacked = False
         # Possibility of moving to unattacked square
+        runToFreedom = True
+        # Light king
+        if self.squareSet[r][c].isupper():
+            attacked = np.any(np.all(np.where([r, c] == self.validMovesToDark, True, False), axis=1))
+            if attacked:
+                runToFreedom = np.any(np.all(np.where([r, c] == self.validMovesFromLight, True, False), axis=1))
+        # Dark King
+        if self.squareSet[r][c].islower():
+            attacked = np.any(np.all(np.where([r, c] == self.validMovesToLight, True, False), axis=1))
+            if attacked:
+                runToFreedom = np.any(np.all(np.where([r, c] == self.validMovesFromDark, True, False), axis=1))
+
+        # kingMoves = ((-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1))
+        # for i in range(8):
+        #     endRow = r + kingMoves[i][0]
+        #     endCol = c + kingMoves[i][1]
+        #     if 0 <= endRow < 8 and 0 <= endCol < 8:  # on board / not allay
+        #         # Light King and end-square free or enemy
+        #         if side and not self.squareSet[endRow][endCol].isupper():
+        #             if np.any(np.all(np.where([endRow, endCol] == self.validMovesToDark, True, False), axis=1)):
+        #                 runToFreedom.append(False)
+        #             else:
+        #                 runToFreedom.append(True)
+        #         # Dark King and end-square free or enemy
+        #         elif side and not self.squareSet[endRow][endCol].islower():
+        #             if np.any(np.all(np.where([endRow, endCol] == self.validMovesToLight, True, False), axis=1)):
+        #                 runToFreedom.append(False)
+        #             else:
+        #                 runToFreedom.append(True)
+        # runToFreedom = True if np.any(runToFreedom) else False
+
+        # Possibility of interposing
         if True:
             pass
-            # Possibility of interposing
+            # Possibility of capturing threatening piece
             if True:
                 pass
-                # Possibility of capturing threatening piece
-                if True:
-                    pass
+
+        if runToFreedom:
+            return False
+        else:
+            return True
 
     def pawnPromotion(self, r, c):
         # Light pawn
         if self.squareSet[r][c].isupper():
-            self.GS.isPromotionL[c] = True
+            self.GS.isPromotionL[c] = False
         # Dark pawn
         else:
             self.GS.isPromotionD[c] = True
-
-
 
     def move(self, startRow, startCol, endRow, endCol):
         # Report an en Passant availability or reset it
@@ -374,8 +408,11 @@ class ChessEngine:
         self.GS.checkKingL = self.checkCheck(self.kingLLoc[0], self.kingLLoc[1])
         # Dark king check update
         self.GS.checkKingD = self.checkCheck(self.kingDLoc[0], self.kingDLoc[1])
-
-        # Next Player
-        self.GS.changeSide()
+        # Light king mate update
+        if self.GS.side == 'd':
+            self.GS.mateKingL = self.checkMate(self.kingLLoc[0], self.kingLLoc[1])
+        # Dark king mate update
+        else:
+            self.GS.mateKingD = self.checkMate(self.kingDLoc[0], self.kingDLoc[1])
 
         return list(np.array(self.squareSet).flatten())

@@ -141,14 +141,27 @@ class UI(QMainWindow):
             self.checkDark.setStyleSheet('QPushButton {background-color: %s}' % QColor(255, 0, 0).name())
         else:
             self.checkDark.setStyleSheet('QPushButton {background-color: %s}' % QColor(0, 160, 255).name())
+        if self.GS.mateKingL:
+            self.mateLight.setStyleSheet('QPushButton {background-color: %s}' % QColor(255, 0, 0).name())
+        else:
+            self.mateLight.setStyleSheet('QPushButton {background-color: %s}' % QColor(0, 160, 255).name())
+
+        if self.GS.mateKingD:
+            self.mateDark.setStyleSheet('QPushButton {background-color: %s}' % QColor(255, 0, 0).name())
+        else:
+            self.mateDark.setStyleSheet('QPushButton {background-color: %s}' % QColor(0, 160, 255).name())
         self.checkLight.repaint()
         self.checkDark.repaint()
+        self.mateLight.repaint()
+        self.mateDark.repaint()
 
     def onPieceReleased(self, boardSet):
         self.boardSet = boardSet
         self.pawnPromotion()
         self.checkMates()
         self.view.setScene(ChessBoard(self.boardSet, self.variant, self, self.GS))
+        # Next Player
+        self.GS.changeSide()
 
     def showContextMenu(self, pos):
         # Create right-click menu with rotate options
