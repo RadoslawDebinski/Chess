@@ -1,4 +1,5 @@
 import numpy as np
+import copy
 
 
 class ChessEngine:
@@ -61,13 +62,15 @@ class ChessEngine:
                 if 0 <= endRow < 8 and 0 <= endCol < 8:  # on board
                     endPiece = self.squareSet[endRow][endCol]
                     if endPiece == ' ':  # empty space valid
-                        self.GS.validMovesFrom = np.vstack((self.GS.validMovesFrom, [r, c]))
-                        self.GS.validMovesTo = np.vstack((self.GS.validMovesTo, [endRow, endCol]))
+                        if self.checkFutureBoi(r, c, endRow, endCol):
+                            self.GS.validMovesFrom = np.vstack((self.GS.validMovesFrom, [r, c]))
+                            self.GS.validMovesTo = np.vstack((self.GS.validMovesTo, [endRow, endCol]))
                     elif (endPiece.islower() and startPiece.isupper() and self.squareSet[r][c].isupper()) or (
                             endPiece.isupper() and startPiece.islower() and self.squareSet[r][c].islower()):
                         # enemy piece is valid
-                        self.GS.validMovesFrom = np.vstack((self.GS.validMovesFrom, [r, c]))
-                        self.GS.validMovesTo = np.vstack((self.GS.validMovesTo, [endRow, endCol]))
+                        if self.checkFutureBoi(r, c, endRow, endCol):
+                            self.GS.validMovesFrom = np.vstack((self.GS.validMovesFrom, [r, c]))
+                            self.GS.validMovesTo = np.vstack((self.GS.validMovesTo, [endRow, endCol]))
                         break
                     else:  # friendly piece invalid
                         break
@@ -83,13 +86,15 @@ class ChessEngine:
             if 0 <= endRow < 8 and 0 <= endCol < 8:  # on board
                 endPiece = self.squareSet[endRow][endCol]
                 if endPiece == ' ':  # empty space valid
-                    self.GS.validMovesFrom = np.vstack((self.GS.validMovesFrom, [r, c]))
-                    self.GS.validMovesTo = np.vstack((self.GS.validMovesTo, [endRow, endCol]))
+                    if self.checkFutureBoi(r, c, endRow, endCol):
+                        self.GS.validMovesFrom = np.vstack((self.GS.validMovesFrom, [r, c]))
+                        self.GS.validMovesTo = np.vstack((self.GS.validMovesTo, [endRow, endCol]))
                 elif (endPiece.islower() and startPiece.isupper() and self.squareSet[r][c].isupper()) or (
                         endPiece.isupper() and startPiece.islower() and self.squareSet[r][c].islower()):
                     # enemy piece is valid
-                    self.GS.validMovesFrom = np.vstack((self.GS.validMovesFrom, [r, c]))
-                    self.GS.validMovesTo = np.vstack((self.GS.validMovesTo, [endRow, endCol]))
+                    if self.checkFutureBoi(r, c, endRow, endCol):
+                        self.GS.validMovesFrom = np.vstack((self.GS.validMovesFrom, [r, c]))
+                        self.GS.validMovesTo = np.vstack((self.GS.validMovesTo, [endRow, endCol]))
 
     def bishop(self, r, c):
         startPiece = self.squareSet[r][c]
@@ -101,13 +106,15 @@ class ChessEngine:
                 if 0 <= endRow < 8 and 0 <= endCol < 8:  # on board
                     endPiece = self.squareSet[endRow][endCol]
                     if endPiece == ' ':  # empty space valid
-                        self.GS.validMovesFrom = np.vstack((self.GS.validMovesFrom, [r, c]))
-                        self.GS.validMovesTo = np.vstack((self.GS.validMovesTo, [endRow, endCol]))
+                        if self.checkFutureBoi(r, c, endRow, endCol):
+                            self.GS.validMovesFrom = np.vstack((self.GS.validMovesFrom, [r, c]))
+                            self.GS.validMovesTo = np.vstack((self.GS.validMovesTo, [endRow, endCol]))
                     elif (endPiece.islower() and startPiece.isupper() and self.squareSet[r][c].isupper()) or (
                             endPiece.isupper() and startPiece.islower() and self.squareSet[r][c].islower()):
                         # enemy piece is valid
-                        self.GS.validMovesFrom = np.vstack((self.GS.validMovesFrom, [r, c]))
-                        self.GS.validMovesTo = np.vstack((self.GS.validMovesTo, [endRow, endCol]))
+                        if self.checkFutureBoi(r, c, endRow, endCol):
+                            self.GS.validMovesFrom = np.vstack((self.GS.validMovesFrom, [r, c]))
+                            self.GS.validMovesTo = np.vstack((self.GS.validMovesTo, [endRow, endCol]))
                         break
                     else:  # friendly piece invalid
                         break
@@ -127,74 +134,88 @@ class ChessEngine:
             if 0 <= endRow < 8 and 0 <= endCol < 8:  # on board
                 endPiece = self.squareSet[endRow][endCol]
                 if endPiece == ' ':  # empty space valid
-                    self.GS.validMovesFrom = np.vstack((self.GS.validMovesFrom, [r, c]))
-                    self.GS.validMovesTo = np.vstack((self.GS.validMovesTo, [endRow, endCol]))
+                    if self.checkFutureBoi(r, c, endRow, endCol):
+                        self.GS.validMovesFrom = np.vstack((self.GS.validMovesFrom, [r, c]))
+                        self.GS.validMovesTo = np.vstack((self.GS.validMovesTo, [endRow, endCol]))
                 elif (endPiece.islower() and startPiece.isupper() and self.squareSet[r][c].isupper()) or (
                         endPiece.isupper() and startPiece.islower() and self.squareSet[r][c].islower()):
                     # enemy piece is valid
-                    self.GS.validMovesFrom = np.vstack((self.GS.validMovesFrom, [r, c]))
-                    self.GS.validMovesTo = np.vstack((self.GS.validMovesTo, [endRow, endCol]))
+                    if self.checkFutureBoi(r, c, endRow, endCol):
+                        self.GS.validMovesFrom = np.vstack((self.GS.validMovesFrom, [r, c]))
+                        self.GS.validMovesTo = np.vstack((self.GS.validMovesTo, [endRow, endCol]))
 
     def pawn(self, r, c):
         if self.squareSet[r][c].isupper():  # light pawn moves
             if r - 1 >= 0:
                 if self.squareSet[r - 1][c] == ' ':
-                    self.GS.validMovesFrom = np.vstack((self.GS.validMovesFrom, [r, c]))
-                    self.GS.validMovesTo = np.vstack((self.GS.validMovesTo, [r - 1, c]))
+                    if self.checkFutureBoi(r, c, r - 1, c):
+                        self.GS.validMovesFrom = np.vstack((self.GS.validMovesFrom, [r, c]))
+                        self.GS.validMovesTo = np.vstack((self.GS.validMovesTo, [r - 1, c]))
                     if r - 2 >= 0:
                         if r == 6 and self.squareSet[r - 2][c] == ' ':
-                            self.GS.validMovesFrom = np.vstack((self.GS.validMovesFrom, [r, c]))
-                            self.GS.validMovesTo = np.vstack((self.GS.validMovesTo, [r - 2, c]))
+                            if self.checkFutureBoi(r, c, r - 2, c):
+                                self.GS.validMovesFrom = np.vstack((self.GS.validMovesFrom, [r, c]))
+                                self.GS.validMovesTo = np.vstack((self.GS.validMovesTo, [r - 2, c]))
             else:  # Promotion
                 self.pawnPromotion(r, c)
             if c - 1 >= 0 and r - 1 >= 0:  # capture to the left
                 if self.squareSet[r - 1][c - 1].islower() and self.squareSet[r][c].isupper():  # enemy piece to capture
-                    self.GS.validMovesFrom = np.vstack((self.GS.validMovesFrom, [r, c]))
-                    self.GS.validMovesTo = np.vstack((self.GS.validMovesTo, [r - 1, c - 1]))
+                    if self.checkFutureBoi(r, c, r - 1, c - 1):
+                        self.GS.validMovesFrom = np.vstack((self.GS.validMovesFrom, [r, c]))
+                        self.GS.validMovesTo = np.vstack((self.GS.validMovesTo, [r - 1, c - 1]))
                 # En passant 1.Free space 2.Move acceptable 3.Pawn nearby
                 if self.squareSet[r - 1][c - 1] == ' ' and self.GS.isEnPassantD[c - 1] \
                         and self.squareSet[r][c - 1] == 'p':  # en passant to the left
-                    self.GS.validMovesFrom = np.vstack((self.GS.validMovesFrom, [r, c]))
-                    self.GS.validMovesTo = np.vstack((self.GS.validMovesTo, [r - 1, c - 1]))
+                    if self.checkFutureBoi(r, c, r - 1, c - 1):
+                        self.GS.validMovesFrom = np.vstack((self.GS.validMovesFrom, [r, c]))
+                        self.GS.validMovesTo = np.vstack((self.GS.validMovesTo, [r - 1, c - 1]))
             if c + 1 <= 7 and r - 1 >= 0:  # capture to the right
                 if self.squareSet[r - 1][c + 1].islower() and self.squareSet[r][c].isupper():  # enemy piece to capture
-                    self.GS.validMovesFrom = np.vstack((self.GS.validMovesFrom, [r, c]))
-                    self.GS.validMovesTo = np.vstack((self.GS.validMovesTo, [r - 1, c + 1]))
+                    if self.checkFutureBoi(r, c, r - 1, c + 1):
+                        self.GS.validMovesFrom = np.vstack((self.GS.validMovesFrom, [r, c]))
+                        self.GS.validMovesTo = np.vstack((self.GS.validMovesTo, [r - 1, c + 1]))
                 # En passant 1.Free space 2.Move acceptable 3.Pawn nearby
                 if self.squareSet[r - 1][c + 1] == ' ' and self.GS.isEnPassantD[c + 1] \
                         and self.squareSet[r][c + 1] == 'p':  # en passant to the right
-                    self.GS.validMovesFrom = np.vstack((self.GS.validMovesFrom, [r, c]))
-                    self.GS.validMovesTo = np.vstack((self.GS.validMovesTo, [r - 1, c + 1]))
+                    if self.checkFutureBoi(r, c, r - 1, c + 1):
+                        self.GS.validMovesFrom = np.vstack((self.GS.validMovesFrom, [r, c]))
+                        self.GS.validMovesTo = np.vstack((self.GS.validMovesTo, [r - 1, c + 1]))
 
         else:  # dark pawn moves
             if r + 1 < 8:
                 if self.squareSet[r + 1][c] == ' ':
-                    self.GS.validMovesFrom = np.vstack((self.GS.validMovesFrom, [r, c]))
-                    self.GS.validMovesTo = np.vstack((self.GS.validMovesTo, [r + 1, c]))
+                    if self.checkFutureBoi(r, c, r + 1, c):
+                        self.GS.validMovesFrom = np.vstack((self.GS.validMovesFrom, [r, c]))
+                        self.GS.validMovesTo = np.vstack((self.GS.validMovesTo, [r + 1, c]))
                     if r + 2 < 8:
                         if r == 1 and self.squareSet[r + 2][c] == ' ':
-                            self.GS.validMovesFrom = np.vstack((self.GS.validMovesFrom, [r, c]))
-                            self.GS.validMovesTo = np.vstack((self.GS.validMovesTo, [r + 2, c]))
+                            if self.checkFutureBoi(r, c, r + 2, c):
+                                self.GS.validMovesFrom = np.vstack((self.GS.validMovesFrom, [r, c]))
+                                self.GS.validMovesTo = np.vstack((self.GS.validMovesTo, [r + 2, c]))
             else:  # Promotion
                 self.pawnPromotion(r, c)
             if c - 1 >= 0 and r + 1 < 8:  # capture to the left
                 if self.squareSet[r + 1][c - 1].isupper() and self.squareSet[r][c].islower():  # enemy piece to capture
-                    self.GS.validMovesFrom = np.vstack((self.GS.validMovesFrom, [r, c]))
-                    self.GS.validMovesTo = np.vstack((self.GS.validMovesTo, [r + 1, c - 1]))
+                    if self.checkFutureBoi(r, c, r + 1, c - 1):
+                        self.GS.validMovesFrom = np.vstack((self.GS.validMovesFrom, [r, c]))
+                        self.GS.validMovesTo = np.vstack((self.GS.validMovesTo, [r + 1, c - 1]))
                 # En passant 1.Free space 2.Move acceptable 3.Pawn nearby
                 if self.squareSet[r + 1][c - 1] == ' ' and self.GS.isEnPassantL[c - 1] \
                         and self.squareSet[r][c - 1] == 'P':  # en passant to the left
-                    self.GS.validMovesFrom = np.vstack((self.GS.validMovesFrom, [r, c]))
-                    self.GS.validMovesTo = np.vstack((self.GS.validMovesTo, [r + 1, c - 1]))
+                    if self.checkFutureBoi(r, c, r + 1, c - 1):
+                        self.GS.validMovesFrom = np.vstack((self.GS.validMovesFrom, [r, c]))
+                        self.GS.validMovesTo = np.vstack((self.GS.validMovesTo, [r + 1, c - 1]))
             if c + 1 <= 7 and r + 1 < 8:  # capture to the right
                 if self.squareSet[r + 1][c + 1].isupper() and self.squareSet[r][c].islower():  # enemy piece to capture
-                    self.GS.validMovesFrom = np.vstack((self.GS.validMovesFrom, [r, c]))
-                    self.GS.validMovesTo = np.vstack((self.GS.validMovesTo, [r + 1, c + 1]))
+                    if self.checkFutureBoi(r, c, r + 1, c + 1):
+                        self.GS.validMovesFrom = np.vstack((self.GS.validMovesFrom, [r, c]))
+                        self.GS.validMovesTo = np.vstack((self.GS.validMovesTo, [r + 1, c + 1]))
                 # En passant 1.Free space 2.Move acceptable 3.Pawn nearby
                 if self.squareSet[r + 1][c + 1] == ' ' and self.GS.isEnPassantL[c + 1] \
                         and self.squareSet[r][c - 1] == 'P':  # en passant to the right
-                    self.GS.validMovesFrom = np.vstack((self.GS.validMovesFrom, [r, c]))
-                    self.GS.validMovesTo = np.vstack((self.GS.validMovesTo, [r + 1, c + 1]))
+                    if self.checkFutureBoi(r, c, r + 1, c + 1):
+                        self.GS.validMovesFrom = np.vstack((self.GS.validMovesFrom, [r, c]))
+                        self.GS.validMovesTo = np.vstack((self.GS.validMovesTo, [r + 1, c + 1]))
 
     def separateMoves(self):
         for i, j in zip(self.GS.validMovesFrom, self.GS.validMovesTo):
@@ -206,6 +227,8 @@ class ChessEngine:
                 self.GS.validMovesToLight = np.vstack((self.GS.validMovesToLight, j))
 
     def shortCastling(self, r, c):
+        r = 7 if self.squareSet[r][c].isupper() else 0
+        c = 4
         kingNotAvailable = []
         try:
             kingNotAvailable = self.GS.stackFrom.index([r, c])
@@ -384,49 +407,59 @@ class ChessEngine:
         self.squareSet[endRow][endCol] = self.squareSet[startRow][startCol]
         self.squareSet[startRow][startCol] = ' '
 
-        # Game stack update
-        self.GS.stackFrom.append([startRow, startCol])
-        self.GS.stackTo.append([endRow, endCol])
-
-        # Update valid moves for checkmate
-        self.genValidMoves()
-        # Light king check update
-        self.GS.checkKingL = self.checkCheck(self.GS.kingLLoc[0], self.GS.kingLLoc[1])
-        # Dark king check update
-        self.GS.checkKingD = self.checkCheck(self.GS.kingDLoc[0], self.GS.kingDLoc[1])
+        # # Update valid moves for checkmate
+        # self.genValidMoves()
+        # # Light king check update
+        # self.GS.checkKingL = self.checkCheck(self.GS.kingLLoc[0], self.GS.kingLLoc[1])
+        # # Dark king check update
+        # self.GS.checkKingD = self.checkCheck(self.GS.kingDLoc[0], self.GS.kingDLoc[1])
         # Light king mate update
-        if self.GS.side == 'd':
-            self.GS.mateKingL = self.checkMate(self.GS.kingLLoc[0], self.GS.kingLLoc[1])
-        # Dark king mate update
-        else:
-            self.GS.mateKingD = self.checkMate(self.GS.kingDLoc[0], self.GS.kingDLoc[1])
+        # if self.GS.side == 'd':
+        #     self.GS.mateKingL = self.checkMate(self.GS.kingLLoc[0], self.GS.kingLLoc[1])
+        # # Dark king mate update
+        # else:
+        #     self.GS.mateKingD = self.checkMate(self.GS.kingDLoc[0], self.GS.kingDLoc[1])
 
         return list(np.array(self.squareSet).flatten())
 
     def checkFutureBoi(self, startRow, startCol, endRow, endCol):
-        color = 'l' if self.squareSet[startRow][startCol].isupper() else 'd'
-        backUpStat = self.GS
-        backUpBoard = list(np.array(self.squareSet).flatten())
-        tempBoard = self.move(startRow, startCol, endRow, endCol)
-        self.__init__(tempBoard, self.GS)
-        self.GS.clearStatus()
-        # Update valid moves for checkmate
-        self.genValidMoves()
-        # Light king check update
-        if color == 'l':
-            self.GS.checkKingL = self.checkCheck(self.GS.kingLLoc[0], self.GS.kingLLoc[1])
-            if self.GS.checkKingL:
-                self.__init__(backUpBoard, backUpStat)
-                return False
+        # King is dead
+        if self.squareSet[endRow][endCol].lower() == 'k':
+            return True
+        if self.GS.testIteration:
+            color = 'l' if self.squareSet[startRow][startCol].isupper() else 'd'
+            backUpStat = copy.copy(self.GS)
+            backUpBoard = list(np.array(self.squareSet).flatten())
+            tempBoard = self.move(startRow, startCol, endRow, endCol)
+            self.GS.stackFrom.append([startRow, startCol])
+            self.GS.stackTo.append([endRow, endCol])
+            self.GS.testIteration = False
+            self.__init__(tempBoard, self.GS)
+            # Update valid moves for checkmate
+            self.genValidMoves()
+            # Light king check update
+            if color == 'l':
+                self.GS.checkKingL = self.checkCheck(self.GS.kingLLoc[0], self.GS.kingLLoc[1])
+                if self.GS.checkKingL:
+                    self.__init__(backUpBoard, backUpStat)
+                    del backUpStat
+                    return False
+                else:
+                    self.__init__(backUpBoard, backUpStat)
+                    del backUpStat
+                    return True
+            # Dark king check update
             else:
-                return True
-        # Dark king check update
+                self.GS.checkKingD = self.checkCheck(self.GS.kingDLoc[0], self.GS.kingDLoc[1])
+                if self.GS.checkKingD:
+                    self.__init__(backUpBoard, backUpStat)
+                    del backUpStat
+                    return False
+                else:
+                    self.__init__(backUpBoard, backUpStat)
+                    del backUpStat
+                    return True
         else:
-            self.GS.checkKingD = self.checkCheck(self.GS.kingDLoc[0], self.GS.kingDLoc[1])
-            if self.GS.checkKingD:
-                self.__init__(backUpBoard, backUpStat)
-                return False
-            else:
-                return True
+            return True
 
 

@@ -35,7 +35,7 @@ class GameStatus:
         self.validMovesFromLight = np.array([0, 0])
         self.validMovesToLight = np.array([0, 0])
 
-        self.testIteration = False
+        self.testIteration = True
 
     def changeSide(self):
         if self.side == 'l':
@@ -44,6 +44,20 @@ class GameStatus:
             self.side = 'l'
 
     def clearStatus(self):
+        # Is pawn available for promotion
+        self.isPromotionL = [False] * 8
+        self.isPromotionD = [False] * 8
+        # Are king checked
+        self.checkKingL = False
+        self.checkKingD = False
+        self.mateKingL = False
+        self.mateKingD = False
+        self.newFig = ''
+
+        # Engine variables
+        n = 8
+        self.moveLongNot = ''
+        self.moveShortNot = ''
         self.validMoves = None
         self.validMovesFrom = np.array([0, 0])
         self.validMovesTo = np.array([0, 0])
@@ -56,5 +70,5 @@ class GameStatus:
         self.validMovesFromLight = np.array([0, 0])
         self.validMovesToLight = np.array([0, 0])
 
-        self.testIteration = False
+        self.testIteration = True
 

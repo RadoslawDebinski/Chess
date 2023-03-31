@@ -90,6 +90,9 @@ class ChessPiece(QGraphicsItem):
         if where is not None:
             engine = ChessEngine(self.boardSet, self.GS)
             self.boardSet = engine.move(prevPosIdy, prevPosIdx, self.movesTo[where][0], self.movesTo[where][1])
+            # Game stack update
+            self.GS.stackFrom.append([prevPosIdy, prevPosIdx])
+            self.GS.stackTo.append([newPosRow, newPosCol])
 
         return True
 
