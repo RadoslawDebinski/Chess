@@ -43,7 +43,7 @@ class ChessPiece(QGraphicsItem):
                 self.setCursor(Qt.ClosedHandCursor)
                 # Generate list of all valid moves
                 engine = ChessEngine(self.boardSet, self.GS)
-                engine.genValidMoves()
+                self.GS = engine.genValidMoves()
                 movesFrom = self.GS.validMovesFrom
 
                 pieceLoc = np.array([self.y, self.x])
@@ -69,7 +69,7 @@ class ChessPiece(QGraphicsItem):
                 # Hiding user hints
                 self.UI.hideHints()
                 if self.isValidPosition(newPos):
-                    self.UI.onPieceReleased(self.boardSet)
+                    self.UI.onPieceReleased(self.boardSet, self.GS)
 
     def isValidPosition(self, newPos):
         # Check if the new position is within the bounds of the chessboard
@@ -93,6 +93,7 @@ class ChessPiece(QGraphicsItem):
             # Game stack update
             self.GS.stackFrom.append([prevPosIdy, prevPosIdx])
             self.GS.stackTo.append([newPosRow, newPosCol])
+            self.GS.changeSide()
 
         return True
 

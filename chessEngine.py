@@ -46,7 +46,7 @@ class ChessEngine:
         # Long castling check
         self.longCastling(self.GS.kingLLoc[0], self.GS.kingLLoc[1])
         self.longCastling(self.GS.kingDLoc[0], self.GS.kingDLoc[1])
-        return True
+        return self.GS
 
     #############################################
     # self.GS.side == 'l' <----> startPiece.isupper()
@@ -379,7 +379,7 @@ class ChessEngine:
     def pawnPromotion(self, r, c):
         # Light pawn
         if self.squareSet[r][c].isupper():
-            self.GS.isPromotionL[c] = False
+            self.GS.isPromotionL[c] = True
         # Dark pawn
         else:
             self.GS.isPromotionD[c] = True
@@ -407,28 +407,17 @@ class ChessEngine:
         self.squareSet[endRow][endCol] = self.squareSet[startRow][startCol]
         self.squareSet[startRow][startCol] = ' '
 
-        # # Update valid moves for checkmate
-        # self.genValidMoves()
-        # # Light king check update
-        # self.GS.checkKingL = self.checkCheck(self.GS.kingLLoc[0], self.GS.kingLLoc[1])
-        # # Dark king check update
-        # self.GS.checkKingD = self.checkCheck(self.GS.kingDLoc[0], self.GS.kingDLoc[1])
-        # Light king mate update
-        # if self.GS.side == 'd':
-        #     self.GS.mateKingL = self.checkMate(self.GS.kingLLoc[0], self.GS.kingLLoc[1])
-        # # Dark king mate update
-        # else:
-        #     self.GS.mateKingD = self.checkMate(self.GS.kingDLoc[0], self.GS.kingDLoc[1])
-
         return list(np.array(self.squareSet).flatten())
 
     def checkFutureBoi(self, startRow, startCol, endRow, endCol):
-        # King is dead
+        color = 'l' if self.squareSet[startRow][startCol].isupper() else 'd'
+        # King emergency
         if self.squareSet[endRow][endCol].lower() == 'k':
+            self.GS.checkKingL = True if color == 'd' else False
+            self.GS.checkKingD = True if color == 'l' else False
             return True
         if self.GS.testIteration:
-            color = 'l' if self.squareSet[startRow][startCol].isupper() else 'd'
-            backUpStat = copy.copy(self.GS)
+            backUpStat = copy.deepcopy(self.GS)
             backUpBoard = list(np.array(self.squareSet).flatten())
             tempBoard = self.move(startRow, startCol, endRow, endCol)
             self.GS.stackFrom.append([startRow, startCol])
@@ -441,23 +430,23 @@ class ChessEngine:
             if color == 'l':
                 self.GS.checkKingL = self.checkCheck(self.GS.kingLLoc[0], self.GS.kingLLoc[1])
                 if self.GS.checkKingL:
+                    del self.GS
                     self.__init__(backUpBoard, backUpStat)
-                    del backUpStat
                     return False
                 else:
+                    del self.GS
                     self.__init__(backUpBoard, backUpStat)
-                    del backUpStat
                     return True
             # Dark king check update
             else:
                 self.GS.checkKingD = self.checkCheck(self.GS.kingDLoc[0], self.GS.kingDLoc[1])
                 if self.GS.checkKingD:
+                    del self.GS
                     self.__init__(backUpBoard, backUpStat)
-                    del backUpStat
                     return False
                 else:
+                    del self.GS
                     self.__init__(backUpBoard, backUpStat)
-                    del backUpStat
                     return True
         else:
             return True

@@ -155,14 +155,14 @@ class UI(QMainWindow):
         self.mateLight.repaint()
         self.mateDark.repaint()
 
-    def onPieceReleased(self, boardSet):
+    def onPieceReleased(self, boardSet, GS):
+        self.GS = GS
         self.boardSet = boardSet
         self.pawnPromotion()
         self.checkMates()
         self.view.setScene(ChessBoard(self.boardSet, self.variant, self, self.GS))
         # Next Player
         self.GS.clearStatus()
-        self.GS.changeSide()
 
     def showContextMenu(self, pos):
         # Create right-click menu with rotate options
