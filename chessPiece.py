@@ -44,6 +44,8 @@ class ChessPiece(QGraphicsItem):
                 # Generate list of all valid moves
                 engine = ChessEngine(self.boardSet, self.GS)
                 self.GS = engine.genValidMoves()
+                # Report Mates
+                self.GS = engine.checkMates(self.GS)
                 movesFrom = self.GS.validMovesFrom
 
                 pieceLoc = np.array([self.y, self.x])

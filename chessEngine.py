@@ -317,14 +317,24 @@ class ChessEngine:
         self.GS.testIteration = False
         self.genValidMoves()
         self.GS.testIteration = True
-        # Light king
+        # Check light King
         kingSafe = np.any(np.all(np.where([self.GS.kingLLoc[0], self.GS.kingLLoc[1]] == self.GS.validMovesToDark,
                                           True, False), axis=1))
         self.GS.checkKingL = True if kingSafe else False
-        # Dark King
+        # Check dark King
         kingSafe = np.any(np.all(np.where([self.GS.kingDLoc[0], self.GS.kingDLoc[1]] == self.GS.validMovesToLight,
                                           True, False), axis=1))
         self.GS.checkKingD = True if kingSafe else False
+        return self.GS
+
+    def checkMates(self, GS):
+        self.GS = GS
+        # Mate light King
+        moves = np.size(self.GS.validMovesToLight)
+        self.GS.mateKingL = True if moves == 4 else False
+        # Mate Dark King
+        moves = np.size(self.GS.validMovesToDark)
+        self.GS.mateKingD = True if moves == 4 else False
         return self.GS
 
     def pawnPromotion(self, endRow, endCol):

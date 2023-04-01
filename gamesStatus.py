@@ -25,15 +25,15 @@ class GameStatus:
         self.moveShortNot = ''
         self.validMoves = None
         self.validMovesFrom = np.array([0, 0])
-        self.validMovesTo = np.array([0, 0])
+        self.validMovesTo = np.array([0, -1])
         # Kings location for castling, check and mate
         self.kingLLoc = []
         self.kingDLoc = []
         # Separated valid moves
         self.validMovesFromDark = np.array([0, 0])
-        self.validMovesToDark = np.array([0, 0])
+        self.validMovesToDark = np.array([0, -1])
         self.validMovesFromLight = np.array([0, 0])
-        self.validMovesToLight = np.array([0, 0])
+        self.validMovesToLight = np.array([0, -1])
 
         self.testIteration = True
 
@@ -44,8 +44,6 @@ class GameStatus:
             self.side = 'l'
 
     def clearStatus(self):
-        self.mateKingL = False
-        self.mateKingD = False
         self.newFig = ''
 
         # Engine variables
@@ -54,15 +52,15 @@ class GameStatus:
         self.moveShortNot = ''
         self.validMoves = None
         self.validMovesFrom = np.array([0, 0])
-        self.validMovesTo = np.array([0, 0])
+        self.validMovesTo = np.array([0, -1])
         # Kings location for castling, check and mate
         self.kingLLoc = []
         self.kingDLoc = []
         # Separated valid moves
         self.validMovesFromDark = np.array([0, 0])
-        self.validMovesToDark = np.array([0, 0])
+        self.validMovesToDark = np.array([0, -1])
         self.validMovesFromLight = np.array([0, 0])
-        self.validMovesToLight = np.array([0, 0])
+        self.validMovesToLight = np.array([0, -1])
 
         self.testIteration = True
 
