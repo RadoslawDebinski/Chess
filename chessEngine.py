@@ -156,8 +156,6 @@ class ChessEngine:
                             if self.checkFutureBoi(r, c, r - 2, c):
                                 self.GS.validMovesFrom = np.vstack((self.GS.validMovesFrom, [r, c]))
                                 self.GS.validMovesTo = np.vstack((self.GS.validMovesTo, [r - 2, c]))
-            else:  # Promotion
-                self.pawnPromotion(r, c)
             if c - 1 >= 0 and r - 1 >= 0:  # capture to the left
                 if self.squareSet[r - 1][c - 1].islower() and self.squareSet[r][c].isupper():  # enemy piece to capture
                     if self.checkFutureBoi(r, c, r - 1, c - 1):
@@ -192,8 +190,6 @@ class ChessEngine:
                             if self.checkFutureBoi(r, c, r + 2, c):
                                 self.GS.validMovesFrom = np.vstack((self.GS.validMovesFrom, [r, c]))
                                 self.GS.validMovesTo = np.vstack((self.GS.validMovesTo, [r + 2, c]))
-            else:  # Promotion
-                self.pawnPromotion(r, c)
             if c - 1 >= 0 and r + 1 < 8:  # capture to the left
                 if self.squareSet[r + 1][c - 1].isupper() and self.squareSet[r][c].islower():  # enemy piece to capture
                     if self.checkFutureBoi(r, c, r + 1, c - 1):
@@ -316,75 +312,34 @@ class ChessEngine:
         else:
             self.GS.isEnPassantL = [False] * 8
 
-    def checkCheck(self, r, c):
+    def checkCheck(self, boardSet, GS):
+        self.__init__(boardSet, GS)
+        self.GS.testIteration = False
+        self.genValidMoves()
+        self.GS.testIteration = True
         # Light king
-        if self.squareSet[r][c].isupper():
-            kingSafe = np.any(np.all(np.where([r, c] == self.GS.validMovesToDark, True, False), axis=1))
-            if kingSafe:
-                return True
+        kingSafe = np.any(np.all(np.where([self.GS.kingLLoc[0], self.GS.kingLLoc[1]] == self.GS.validMovesToDark,
+                                          True, False), axis=1))
+        self.GS.checkKingL = True if kingSafe else False
         # Dark King
-        if self.squareSet[r][c].islower():
-            kingSafe = np.any(np.all(np.where([r, c] == self.GS.validMovesToLight, True, False), axis=1))
-            if kingSafe:
-                return True
-        return False
+        kingSafe = np.any(np.all(np.where([self.GS.kingDLoc[0], self.GS.kingDLoc[1]] == self.GS.validMovesToLight,
+                                          True, False), axis=1))
+        self.GS.checkKingD = True if kingSafe else False
+        return self.GS
 
-    def checkMate(self, r, c):
-        # Is king under attack
-        attacked = False
-        # Possibility of moving to unattacked square
-        runToFreedom = True
-        # Light king
-        if self.squareSet[r][c].isupper():
-            attacked = np.any(np.all(np.where([r, c] == self.GS.validMovesToDark, True, False), axis=1))
-            if attacked:
-                runToFreedom = np.any(np.all(np.where([r, c] == self.GS.validMovesFromLight, True, False), axis=1))
-        # Dark King
-        if self.squareSet[r][c].islower():
-            attacked = np.any(np.all(np.where([r, c] == self.GS.validMovesToLight, True, False), axis=1))
-            if attacked:
-                runToFreedom = np.any(np.all(np.where([r, c] == self.GS.validMovesFromDark, True, False), axis=1))
-
-        # kingMoves = ((-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1))
-        # for i in range(8):
-        #     endRow = r + kingMoves[i][0]
-        #     endCol = c + kingMoves[i][1]
-        #     if 0 <= endRow < 8 and 0 <= endCol < 8:  # on board / not allay
-        #         # Light King and end-square free or enemy
-        #         if side and not self.squareSet[endRow][endCol].isupper():
-        #             if np.any(np.all(np.where([endRow, endCol] == self.GS.validMovesToDark, True, False), axis=1)):
-        #                 runToFreedom.append(False)
-        #             else:
-        #                 runToFreedom.append(True)
-        #         # Dark King and end-square free or enemy
-        #         elif side and not self.squareSet[endRow][endCol].islower():
-        #             if np.any(np.all(np.where([endRow, endCol] == self.GS.validMovesToLight, True, False), axis=1)):
-        #                 runToFreedom.append(False)
-        #             else:
-        #                 runToFreedom.append(True)
-        # runToFreedom = True if np.any(runToFreedom) else False
-
-        # Possibility of interposing
-        if True:
-            pass
-            # Possibility of capturing threatening piece
-            if True:
-                pass
-
-        if runToFreedom:
-            return False
-        else:
-            return True
-
-    def pawnPromotion(self, r, c):
-        # Light pawn
-        if self.squareSet[r][c].isupper():
-            self.GS.isPromotionL[c] = True
+    def pawnPromotion(self, endRow, endCol):
+        if self.GS.side == 'l':
+            if endRow == 0:
+                self.GS.isPromotionL[endCol] = True
         # Dark pawn
         else:
-            self.GS.isPromotionD[c] = True
+            if endRow == 7:
+                self.GS.isPromotionD[endCol] = True
 
     def move(self, startRow, startCol, endRow, endCol):
+        # Pawn promotion report
+        if self.squareSet[startRow][startCol].lower() == 'p':
+            self.pawnPromotion(endRow, endCol)
         # Report an en Passant availability or reset it
         self.enPassantReport(startRow, startCol, endRow, endCol)
         # Proceed an en Passant
@@ -402,33 +357,30 @@ class ChessEngine:
         if self.squareSet[startRow][startCol].lower() == 'k' and endCol == startCol - 2:
             self.squareSet[endRow][endCol + 1] = self.squareSet[endRow][endCol - 2]
             self.squareSet[endRow][endCol - 2] = ' '
-
         # Always [target = piece] and [start = ' ']
         self.squareSet[endRow][endCol] = self.squareSet[startRow][startCol]
         self.squareSet[startRow][startCol] = ' '
 
-        return list(np.array(self.squareSet).flatten())
+        return list(np.array(self.squareSet).flatten()), self.GS
 
     def checkFutureBoi(self, startRow, startCol, endRow, endCol):
         color = 'l' if self.squareSet[startRow][startCol].isupper() else 'd'
-        # King emergency
+        # King exception
         if self.squareSet[endRow][endCol].lower() == 'k':
-            self.GS.checkKingL = True if color == 'd' else False
-            self.GS.checkKingD = True if color == 'l' else False
             return True
         if self.GS.testIteration:
             backUpStat = copy.deepcopy(self.GS)
             backUpBoard = list(np.array(self.squareSet).flatten())
-            tempBoard = self.move(startRow, startCol, endRow, endCol)
+            tempBoard, self.GS = self.move(startRow, startCol, endRow, endCol)
             self.GS.stackFrom.append([startRow, startCol])
             self.GS.stackTo.append([endRow, endCol])
             self.GS.testIteration = False
             self.__init__(tempBoard, self.GS)
             # Update valid moves for checkmate
-            self.genValidMoves()
+            self.GS = self.genValidMoves()
             # Light king check update
             if color == 'l':
-                self.GS.checkKingL = self.checkCheck(self.GS.kingLLoc[0], self.GS.kingLLoc[1])
+                self.GS = self.checkCheck(self.boardSet, self.GS)
                 if self.GS.checkKingL:
                     del self.GS
                     self.__init__(backUpBoard, backUpStat)
@@ -439,7 +391,7 @@ class ChessEngine:
                     return True
             # Dark king check update
             else:
-                self.GS.checkKingD = self.checkCheck(self.GS.kingDLoc[0], self.GS.kingDLoc[1])
+                self.GS = self.checkCheck(self.boardSet, self.GS)
                 if self.GS.checkKingD:
                     del self.GS
                     self.__init__(backUpBoard, backUpStat)

@@ -87,14 +87,16 @@ class ChessPiece(QGraphicsItem):
         except ValueError:
             where = None
 
+        engine = ChessEngine(self.boardSet, self.GS)
         if where is not None:
-            engine = ChessEngine(self.boardSet, self.GS)
-            self.boardSet = engine.move(prevPosIdy, prevPosIdx, self.movesTo[where][0], self.movesTo[where][1])
+            self.boardSet, self.GS = engine.move(prevPosIdy, prevPosIdx, self.movesTo[where][0], self.movesTo[where][1])
             # Game stack update
             self.GS.stackFrom.append([prevPosIdy, prevPosIdx])
             self.GS.stackTo.append([newPosRow, newPosCol])
             self.GS.changeSide()
-
+        # Report check
+        self.GS.clearStatus()
+        self.GS = engine.checkCheck(self.boardSet, self.GS)
         return True
 
     def boundingRect(self):

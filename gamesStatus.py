@@ -44,12 +44,6 @@ class GameStatus:
             self.side = 'l'
 
     def clearStatus(self):
-        # Is pawn available for promotion
-        self.isPromotionL = [False] * 8
-        self.isPromotionD = [False] * 8
-        # Are king checked
-        self.checkKingL = False
-        self.checkKingD = False
         self.mateKingL = False
         self.mateKingD = False
         self.newFig = ''
