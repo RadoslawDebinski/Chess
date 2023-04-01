@@ -11,6 +11,8 @@ from stockEngine import StockEngine
 from chessEngine import ChessEngine
 import chessGraphics
 from gamesStatus import GameStatus
+import time
+from textEngine import TextEngine
 
 stockPath = "C:\\Users\\radek\\Downloads\\stockfish-11-win\\stockfish-11-win\\Windows\\stockfish_20011801_x64.exe"
 
@@ -44,12 +46,13 @@ class UI(QMainWindow):
         self.textEdit.setText("Here insert move")
         # Create a QFont object with a larger font size
         font = QFont()
-        font.setPointSize(30)
+        font.setPointSize(28)
         # Set the font for the textEdit widget
         self.textEdit.setFont(font)
 
         # Connect our Widgets
         self.submitButton.clicked.connect(self.onSubmit)
+        self.textEdit.textChanged.connect(self.onTextChanged)
 
         # Initial board set
         self.variant = variant
@@ -62,6 +65,11 @@ class UI(QMainWindow):
         # Set board appearance
         self.view = QGraphicsView(self)
         board = ChessBoard(self.boardSet, self.variant, self, self.GS)
+
+        # Generate list of all valid moves
+        engine = ChessEngine(self.boardSet, self.GS)
+        self.GS = engine.genValidMoves()
+
         self.view.setScene(board)
         self.view.setRenderHint(QPainter.Antialiasing)
         imgPath = f":/board/{self.variant}"
@@ -97,6 +105,12 @@ class UI(QMainWindow):
         # Show the app
         self.show()
 
+    def onTextChanged(self):
+        text = self.textEdit.toPlainText()
+        if text.endswith("\n"):
+            self.submitButton.click()
+            self.textEdit.clear()
+
     def showHints(self, hintTo):
         # Clear any previously shown hints
         for hint in self.hints:
@@ -118,36 +132,52 @@ class UI(QMainWindow):
     def onSubmit(self):
         # Get the text from the textEdit widget
         text = self.textEdit.toPlainText()
-        engine = ChessEngine(self.boardSet)
-        isValid = engine.isValid(text, self.GS.side)
-        if isValid:
-            engine.move()
-            self.textEdit.clear()
+        engine = TextEngine(self.boardSet, self.GS)
+        if engine.proceedData(text.lower()):
+            valid, self.boardSet, self.GS = engine.isMoveValid()
+            if valid:
+                self.textEdit.clear()
+                self.onPieceReleased(self.boardSet, self.GS)
+            else:
+                self.textEdit.clear()
+                self.textEdit.setText("Unacceptable move insert new move")
         else:
             self.textEdit.clear()
-            self.textEdit.setText("Unacceptable move")
+            self.textEdit.setText("This is not move")
 
     def checkMates(self):
         if self.GS.checkKingL:
             self.checkLight.setStyleSheet('QPushButton {background-color: %s}' % QColor(255, 0, 0).name())
         else:
             self.checkLight.setStyleSheet('QPushButton {background-color: %s}' % QColor(0, 160, 255).name())
+        self.checkLight.repaint()
 
         if self.GS.checkKingD:
             self.checkDark.setStyleSheet('QPushButton {background-color: %s}' % QColor(255, 0, 0).name())
         else:
             self.checkDark.setStyleSheet('QPushButton {background-color: %s}' % QColor(0, 160, 255).name())
+        self.checkDark.repaint()
         if self.GS.mateKingL:
             self.mateLight.setStyleSheet('QPushButton {background-color: %s}' % QColor(255, 0, 0).name())
+            self.mateLight.repaint()
+            time.sleep(3)
+            # Create a new instance of the UI class
+            new_instance = UI(self.variant)
+            # Close the current instance
+            self.close()
         else:
             self.mateLight.setStyleSheet('QPushButton {background-color: %s}' % QColor(0, 160, 255).name())
 
         if self.GS.mateKingD:
             self.mateDark.setStyleSheet('QPushButton {background-color: %s}' % QColor(255, 0, 0).name())
+            self.mateDark.repaint()
+            time.sleep(3)
+            # Create a new instance of the UI class
+            new_instance = UI(self.variant)
+            # Close the current instance
+            self.close()
         else:
             self.mateDark.setStyleSheet('QPushButton {background-color: %s}' % QColor(0, 160, 255).name())
-        self.checkLight.repaint()
-        self.checkDark.repaint()
         self.mateLight.repaint()
         self.mateDark.repaint()
 
@@ -155,10 +185,18 @@ class UI(QMainWindow):
         self.GS = GS
         self.boardSet = boardSet
         self.pawnPromotion()
-        self.checkMates()
-        self.view.setScene(ChessBoard(self.boardSet, self.variant, self, self.GS))
+
         # Next Player
         self.GS.clearStatus()
+
+        # Generate list of all valid moves
+        engine = ChessEngine(self.boardSet, self.GS)
+        self.GS = engine.genValidMoves()
+        # Report Mates
+        self.GS = engine.checkMates(self.GS)
+        self.checkMates()
+        self.view.setScene(ChessBoard(self.boardSet, self.variant, self, self.GS))
+
 
     def showContextMenu(self, pos):
         # Create right-click menu with rotate options

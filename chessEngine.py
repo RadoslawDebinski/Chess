@@ -9,14 +9,6 @@ class ChessEngine:
         n = 8
         self.squareSet = [self.boardSet[i:i + n] for i in range(0, len(self.boardSet), n)]
 
-    def isValid(self, text, side):
-        self.GS.moveShortNot = text
-        # here translation from short to long !!!
-        self.GS.moveLongNot = self.GS.moveShortNot
-        # here translation from long to indexes
-        self.GS.side = side
-        self.genValidMoves()
-
     def genValidMoves(self):
         # calling functions for each piece on board and adding valid moves to list
         for r in range(len(self.squareSet)):
