@@ -14,6 +14,8 @@ class TextEngine:
     
     def proceedData(self, text):
         data = list(bytes(text, 'ascii'))
+        if len(data) == 0:
+            return False
         if 97 <= data[0] <= 104:
             self.prevPosCol = (data[0] - 97)
         else:

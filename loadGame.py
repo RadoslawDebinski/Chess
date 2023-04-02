@@ -41,6 +41,8 @@ class UI(QMainWindow):
         self.checkDark = self.findChild(QPushButton, "pushButton")
         self.mateLight = self.findChild(QPushButton, "pushButton_3")
         self.mateDark = self.findChild(QPushButton, "pushButton_2")
+        self.startButton = self.findChild(QPushButton, "startButton")
+        self.resetButton = self.findChild(QPushButton, "resetButton")
 
         # Initial textEdit message
         self.textEdit.setText("Here insert move")
@@ -52,7 +54,13 @@ class UI(QMainWindow):
 
         # Connect our Widgets
         self.submitButton.clicked.connect(self.onSubmit)
+        self.reverseButton.clicked.connect(self.onReverse)
         self.textEdit.textChanged.connect(self.onTextChanged)
+        self.resetButton.clicked.connect(self.resetGame)
+        self.startButton.clicked.connect(self.startGame)
+
+        # Create an event loop
+        self.loop = QEventLoop()
 
         # Initial board set
         self.variant = variant
@@ -105,11 +113,32 @@ class UI(QMainWindow):
         # Show the app
         self.show()
 
+    def startGame(self):
+        self.startButton.setEnabled(False)
+
+    def resetGame(self):
+        time.sleep(1)
+        # Create a new instance of the UI class
+        new_instance = UI(self.variant)
+        # Close the current instance
+        self.close()
+
+    def disableScene(self):
+        self.board.setEnabled(False)
+        self.submitButton.setEnabled(False)
+        self.textEdit.setEnabled(False)
+
+    def onReverse(self):
+        # Exit the event loop when the ReverseButton is clicked
+        self.board.setEnabled(True)
+        self.submitButton.setEnabled(True)
+        self.textEdit.setEnabled(True)
+        self.loop.quit()
+
     def onTextChanged(self):
         text = self.textEdit.toPlainText()
         if text.endswith("\n"):
             self.submitButton.click()
-            self.textEdit.clear()
 
     def showHints(self, hintTo):
         # Clear any previously shown hints
@@ -140,7 +169,7 @@ class UI(QMainWindow):
                 self.onPieceReleased(self.boardSet, self.GS)
             else:
                 self.textEdit.clear()
-                self.textEdit.setText("Unacceptable move insert new move")
+                self.textEdit.setText("Unacceptable move insert new one")
         else:
             self.textEdit.clear()
             self.textEdit.setText("This is not move")
@@ -196,6 +225,10 @@ class UI(QMainWindow):
         self.GS = engine.checkMates(self.GS)
         self.checkMates()
         self.view.setScene(ChessBoard(self.boardSet, self.variant, self, self.GS))
+        # Disable all elements of scene other than onReverse button
+        self.disableScene()
+        # Wait for the ReverseButton to be clicked
+        self.loop.exec_()
 
 
     def showContextMenu(self, pos):
@@ -227,8 +260,6 @@ class UI(QMainWindow):
             self.GS.isPromotionD[column] = False
 
     def createMenu(self):
-        # Create a new Qt application
-
         # Create a QDialog widget as our menu window
         promMenu = QDialog()
         promMenu.setWindowFlags(Qt.WindowCloseButtonHint)  # disable the close button

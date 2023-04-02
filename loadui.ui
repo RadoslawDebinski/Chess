@@ -17,14 +17,14 @@
    <widget class="QPushButton" name="SubmitButton">
     <property name="geometry">
      <rect>
-      <x>880</x>
+      <x>940</x>
       <y>910</y>
       <width>251</width>
       <height>51</height>
      </rect>
     </property>
     <property name="text">
-     <string>Submit move</string>
+     <string>Submit text move</string>
     </property>
    </widget>
    <widget class="QTextEdit" name="textEdit">
@@ -41,13 +41,13 @@
     <property name="geometry">
      <rect>
       <x>940</x>
-      <y>530</y>
+      <y>520</y>
       <width>251</width>
-      <height>71</height>
+      <height>131</height>
      </rect>
     </property>
     <property name="text">
-     <string>Reverse the clock</string>
+     <string>Continue</string>
     </property>
    </widget>
    <widget class="QGroupBox" name="BoardBox">
@@ -82,7 +82,7 @@
       <x>940</x>
       <y>260</y>
       <width>251</width>
-      <height>261</height>
+      <height>251</height>
      </rect>
     </property>
     <property name="title">
@@ -139,6 +139,32 @@
     </property>
     <property name="text">
      <string>Check</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="startButton">
+    <property name="geometry">
+     <rect>
+      <x>940</x>
+      <y>660</y>
+      <width>251</width>
+      <height>101</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Start</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="resetButton">
+    <property name="geometry">
+     <rect>
+      <x>940</x>
+      <y>760</y>
+      <width>251</width>
+      <height>101</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Reset</string>
     </property>
    </widget>
   </widget>
