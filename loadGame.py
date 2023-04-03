@@ -15,7 +15,7 @@ import time
 from textEngine import TextEngine
 from chessClock import ChessClock
 
-stockPath = "C:\\Users\\radek\\Downloads\\stockfish-11-win\\stockfish-11-win\\Windows\\stockfish_20011801_x64.exe"
+stockPath = "stockfish-11-win\\Windows\\stockfish_20011801_x64.exe"
 
 
 class UI(QMainWindow):
@@ -61,7 +61,7 @@ class UI(QMainWindow):
         self.startButton.clicked.connect(self.startGame)
 
         # Create an event loop
-        self.loop = QEventLoop()
+        # self.loop = QEventLoop()
 
         # Clocks
         self.clockDark = ChessClock()

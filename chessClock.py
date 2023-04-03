@@ -11,7 +11,7 @@ class ChessClock(QGraphicsEllipseItem):
         super().__init__()
         self.timer = QTimer()
         self.timer.timeout.connect(self.update1)
-        self.elapsed_time = QTime(5, 20, 30, 500)  # initial elapsed time
+        self.elapsed_time = QTime(11, 50, 0)  # initial elapsed time
         self.setRect(0, 0, 200, 200)  # set the size of the clock
 
     def paint(self, painter, option, widget=None):
@@ -41,16 +41,16 @@ class ChessClock(QGraphicsEllipseItem):
         millisecond_angle = self.elapsed_time.msec() * 0.36  # 0.36 degrees per millisecond
         hour_arrow = QLineF(center, center + hour_arrow_length *
                             QPointF(sin(hour_angle * pi / 180),
-                                    cos(hour_angle * pi / 180)))  # negative y-coordinates to flip the y-axis
+                                    -cos(hour_angle * pi / 180)))  # negative y-coordinates to flip the y-axis
         minute_arrow = QLineF(center, center + minute_arrow_length *
                               QPointF(sin(minute_angle * pi / 180),
-                                      cos(minute_angle * pi / 180)))
+                                      -cos(minute_angle * pi / 180)))
         second_arrow = QLineF(center, center + second_arrow_length *
                               QPointF(sin(second_angle * pi / 180),
-                                      cos(second_angle * pi / 180)))
+                                      -cos(second_angle * pi / 180)))
         millisecond_arrow = QLineF(center, center + millisecond_arrow_length *
                               QPointF(sin(millisecond_angle * pi / 180),
-                                      cos(millisecond_angle * pi / 180)))
+                                      -cos(millisecond_angle * pi / 180)))
         painter.setPen(QPen(Qt.black, 3))
         painter.drawLine(hour_arrow)
         painter.setPen(QPen(Qt.black, 2))
