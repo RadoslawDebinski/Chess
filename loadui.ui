@@ -73,7 +73,7 @@
      </rect>
     </property>
     <property name="title">
-     <string>Clock1</string>
+     <string>Clock Dark</string>
     </property>
    </widget>
    <widget class="QGroupBox" name="ClockBox2">
@@ -86,7 +86,7 @@
      </rect>
     </property>
     <property name="title">
-     <string>Clock2</string>
+     <string>Clock Light</string>
     </property>
    </widget>
    <widget class="QPushButton" name="pushButton">

@@ -13,6 +13,7 @@ import chessGraphics
 from gamesStatus import GameStatus
 import time
 from textEngine import TextEngine
+from chessClock import ChessClock
 
 stockPath = "C:\\Users\\radek\\Downloads\\stockfish-11-win\\stockfish-11-win\\Windows\\stockfish_20011801_x64.exe"
 
@@ -62,6 +63,29 @@ class UI(QMainWindow):
         # Create an event loop
         self.loop = QEventLoop()
 
+        # Clocks
+        self.clockDark = ChessClock()
+        self.clockLight = ChessClock()
+
+        # Clocks memory
+        self.clockMemory = 'l'
+
+        # Add clocks view, scene and add them to boxes
+        self.clockViewDark = QGraphicsView(self)
+        self.clockViewLight = QGraphicsView(self)
+        clockSceneDark = QGraphicsScene(self)
+        clockSceneLight = QGraphicsScene(self)
+        clockSceneDark.addItem(self.clockDark)
+        clockSceneLight.addItem(self.clockLight)
+        self.clockViewDark.setScene(clockSceneDark)
+        self.clockViewLight.setScene(clockSceneLight)
+        clockBoxDark = QVBoxLayout()
+        clockBoxLight = QVBoxLayout()
+        clockBoxDark.addWidget(self.clockViewDark)
+        clockBoxLight.addWidget(self.clockViewLight)
+        self.clock1.setLayout(clockBoxDark)
+        self.clock2.setLayout(clockBoxLight)
+
         # Initial board set
         self.variant = variant
         engine = StockEngine(stockPath)
@@ -110,10 +134,17 @@ class UI(QMainWindow):
         self.view.setContextMenuPolicy(Qt.CustomContextMenu)
         self.view.customContextMenuRequested.connect(self.showContextMenu)
 
+        # Disable all elements of scene other than start button
+        self.disableScene()
+
         # Show the app
         self.show()
 
     def startGame(self):
+        self.board.setEnabled(True)
+        self.submitButton.setEnabled(True)
+        self.textEdit.setEnabled(True)
+        self.clockLight.timer.start(1)
         self.startButton.setEnabled(False)
 
     def resetGame(self):
@@ -129,11 +160,22 @@ class UI(QMainWindow):
         self.textEdit.setEnabled(False)
 
     def onReverse(self):
+        if self.GS.side == 'l':
+            self.clockLight.timer.start(1)
+            self.clockDark.timer.stop()
+            self.clockMemory = 'd'
+        else:
+            self.clockLight.timer.stop()
+            self.clockDark.timer.start(1)
+            self.clockMemory = 'l'
+        # Unable buttons
+        # self.board.setEnabled(True)
+        # self.submitButton.setEnabled(True)
+        # self.textEdit.setEnabled(True)
+
         # Exit the event loop when the ReverseButton is clicked
-        self.board.setEnabled(True)
-        self.submitButton.setEnabled(True)
-        self.textEdit.setEnabled(True)
-        self.loop.quit()
+        # if self.loop.isRunning():
+        #     self.loop.exit()
 
     def onTextChanged(self):
         text = self.textEdit.toPlainText()
@@ -226,9 +268,9 @@ class UI(QMainWindow):
         self.checkMates()
         self.view.setScene(ChessBoard(self.boardSet, self.variant, self, self.GS))
         # Disable all elements of scene other than onReverse button
-        self.disableScene()
+        # self.disableScene()
         # Wait for the ReverseButton to be clicked
-        self.loop.exec_()
+        # self.loop.exec()
 
 
     def showContextMenu(self, pos):
