@@ -184,17 +184,16 @@ class UI(QMainWindow):
 
     def showHints(self, hintTo):
         # Clear any previously shown hints
-        for hint in self.hints:
-            hint.hide()
+        [hint.hide() for hint in self.hints]
         self.hints = []
+        self.hints = list(map(lambda hintCoord: self.createHintLabel(hintCoord), hintTo))
 
-        # Create a QLabel for each hint and add it to the view
-        for hintCoord in hintTo:
-            hintLabel = QLabel(self.view)
-            hintLabel.setPixmap(self.pixmap)
-            hintLabel.setGeometry(QRect(hintCoord[1] * 100 + 23, hintCoord[0] * 100 + 23, 60, 60))
-            hintLabel.show()
-            self.hints.append(hintLabel)
+    def createHintLabel(self, hintCoord):
+        hintLabel = QLabel(self.view)
+        hintLabel.setPixmap(self.pixmap)
+        hintLabel.setGeometry(QRect(hintCoord[1] * 100 + 23, hintCoord[0] * 100 + 23, 60, 60))
+        hintLabel.show()
+        return hintLabel
 
     def hideHints(self):
         for hint in self.hints:

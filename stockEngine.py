@@ -22,13 +22,7 @@ class StockEngine():
         board = self.engine.get_board_visual()
         board = board.translate({ord(i): None for i in '+-|'})
         board = board.translate({ord('\n'): None})
-        i = 0
-        j = 1
-        pureBoard = []
-        for sign in board:
-            if i == j:
-                pureBoard.append(sign)
-                j += 3
-            i += 1
+
+        pureBoard = [sign for i, sign in enumerate(board) if (i + 2) % 3 == 0]
 
         return pureBoard
