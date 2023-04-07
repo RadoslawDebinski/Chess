@@ -1,101 +1,135 @@
 from chessEngine import ChessEngine
 from gamesStatus import GameStatus
 import numpy as np
+from itertools import zip_longest
+import re
 
 
 class TextEngine:
     def __init__(self, boardSet, GS):
         self.boardSet = boardSet
+        n = 8
+        self.squareSet = [list(t) for t in zip_longest(*[iter(self.boardSet)] * n, fillvalue=None)]
         self.GS = GS
         self.prevPosRow = None
         self.prevPosCol = None
         self.newPosRow = None
         self.newPosCol = None
+        self.move = ''
     
-    def proceedData(self, text):
-        data = list(bytes(text, 'ascii'))
-        if len(data) == 0:
-            return False
-        if 97 <= data[0] <= 104:
-            self.prevPosCol = (data[0] - 97)
+    def applyMask(self):
+        if 'x' in self.move:
+            self.move = self.move.replace('x', '')
+        if 'e.p.' in self.move:
+            self.move = self.move.replace('e.p.', '')
+        if '+' in self.move:
+            self.move = self.move.replace('+', '')
+        if '#' in self.move:
+            self.move = self.move.replace('#', '')
+        if '\n' in self.move:
+            self.move = self.move.replace('\n', '')
+        pattern = re.compile(r"^([RNBQK]?)([a-h]?)([1-8]?)([a-h][1-8])$")
+        match = pattern.match(self.move)
+
+        if match:
+            return True
         else:
             return False
 
-        if 49 <= data[1] <= 57:
-            self.prevPosRow = 7 - (data[1] - 49)
-        else:
+    def algebraicToLongNotation(self, move):
+        self.move = move
+
+        if not self.applyMask():
             return False
 
-        if 97 <= data[2] <= 104:
-            self.newPosCol = (data[2] - 97)
-        else:
-            return False
+        if self.GS.side == 'd':
+            pieces = {'K': 'k', 'Q': 'q', 'R': 'r', 'B': 'b', 'N': 'n'}
+            validMovesFrom = self.GS.validMovesFromDark
+            validMovesTo = self.GS.validMovesToDark
 
-        if 49 <= data[3] <= 57:
-            self.newPosRow = 7 - (data[3] - 49)
         else:
-            return False
+            pieces = {'K': 'K', 'Q': 'Q', 'R': 'R', 'B': 'B', 'N': 'N'}
+            validMovesFrom = self.GS.validMovesFromLight
+            validMovesTo = self.GS.validMovesToLight
 
+        ranks = {'1': 7, '2': 6, '3': 5, '4': 4, '5': 3, '6': 2, '7': 1, '8': 0}
+        files = {'a': 0, 'b': 1, 'c': 2, 'd': 3, 'e': 4, 'f': 5, 'g': 6, 'h': 7}
+
+        if self.move == '0-0':
+            if self.GS.side == 'l':
+                destinationRank = 7
+                destinationFile = 6
+                sourceRank = 7
+                sourceFile = 4
+            else:
+                destinationRank = 0
+                destinationFile = 6
+                sourceRank = 0
+                sourceFile = 4
+        elif self.move == '0-0-0':
+            if self.GS.side == 'l':
+                destinationRank = 7
+                destinationFile = 2
+                sourceRank = 7
+                sourceFile = 4
+            else:
+                destinationRank = 0
+                destinationFile = 2
+                sourceRank = 0
+                sourceFile = 4
+        else:
+            # Determine the piece being moved
+            if self.move[0] in pieces:
+                piece = pieces[self.move[0]]
+                startIndex = 1
+            elif self.GS.side == 'l':
+                piece = 'P'
+                startIndex = 0
+            else:
+                piece = 'p'
+                startIndex = 0
+
+            destinationRank = ranks[self.move[-1]]
+            destinationFile = files[self.move[-2]]
+            # Finding indexes of valid moves
+            toIdx = [i for i, loc in enumerate(validMovesTo) if loc[0] == destinationRank and loc[1] == destinationFile]
+            fromPos = validMovesFrom[toIdx]
+            validFrom = [i for i, loc in enumerate(fromPos) if self.squareSet[loc[0]][loc[1]] == piece]
+            validFrom = fromPos[validFrom]
+
+            if np.shape(validFrom)[0] == 0:
+                return False
+            if np.shape(validFrom)[0] > 1:
+                if validFrom[0][0] == validFrom[1][0]:
+                    try:
+                        column = files[self.move[startIndex]]
+                        validFrom = validFrom[np.any(np.where(validFrom == column, True, False), axis=1)][0]
+                        sourceRank, sourceFile = validFrom
+                    except KeyError:
+                        return False
+
+                elif validFrom[0][1] == validFrom[1][1]:
+                    try:
+                        row = files[self.move[startIndex]]
+                        validFrom = validFrom[np.any(np.where(validFrom == row, True, False), axis=1)][0]
+                        sourceRank, sourceFile = validFrom
+                    except KeyError:
+                        return False
+                else:
+                    try:
+                        sourceRank, sourceFile = ranks[self.move[startIndex + 1]], files[self.move[startIndex]]
+                    except KeyError:
+                        return False
+            else:
+                validFrom = validFrom[0]
+                sourceRank = validFrom[0]
+                sourceFile = validFrom[1]
+
+        self.prevPosRow = sourceRank
+        self.prevPosCol = sourceFile
+        self.newPosRow = destinationRank
+        self.newPosCol = destinationFile
         return True
-
-    # def algebraic_to_long_notation(self, move):
-    #     pieces = {'K': 'King', 'Q': 'Queen', 'R': 'Rook', 'B': 'Bishop', 'N': 'Knight'}
-    #     files = {'a': 0, 'b': 1, 'c': 2, 'd': 3, 'e': 4, 'f': 5, 'g': 6, 'h': 7}
-    #     ranks = {'1': 7, '2': 6, '3': 5, '4': 4, '5': 3, '6': 2, '7': 1, '8': 0}
-    #
-    #     # Determine if the move is a castling move
-    #     if move in ['O-O', 'O-O-O', '0-0', '0-0-0']:
-    #         return move.replace('-', ' ')  # Return the castling notation
-    #
-    #     # Determine the piece being moved
-    #     if move[0] in pieces:
-    #         piece = pieces[move[0]]
-    #         start_index = 1
-    #     else:
-    #         piece = 'Pawn'
-    #         start_index = 0
-    #
-    #     # Determine the starting square of the piece being moved
-    #     if 'x' in move:
-    #         start_file = files[move[start_index - 1]]
-    #         start_rank = ranks[move[start_index + 1]]
-    #     else:
-    #         start_file = files[move[start_index]]
-    #         start_rank = ranks[move[start_index + 1]]
-    #
-    #     # Determine the destination square
-    #     destination_file = files[move[start_index]]
-    #     destination_rank = ranks[move[start_index + 1]]
-    #     destination = f"{destination_file}, {destination_rank}"
-    #
-    #     # Determine if the move is a capture or check
-    #     if '#' in move:
-    #         check = 'checkmate'
-    #     elif '+' in move:
-    #         check = 'check'
-    #     else:
-    #         check = None
-    #
-    #     # Determine if the move is a capture
-    #     if 'x' in move:
-    #         capture = True
-    #         capture_square = f"{destination_file}, {start_rank}"
-    #         return f"{piece} on {start_file}, {start_rank} captures on {capture_square} and moves to {destination} {check}"
-    #
-    #     # Determine if the move is a pawn promotion
-    #     if len(move) == 5 and move[4] in pieces:
-    #         promotion_piece = pieces[move[4]]
-    #         return f"{piece} on {start_file}, {start_rank} moves to {destination} and promotes to a {promotion_piece} {check}"
-    #
-    #     # Determine if the move is en passant
-    #     if 'e.p.' in move:
-    #         capture_file = files[move[start_index]]
-    #         capture_rank = int(move[start_index + 1]) - 1 if piece == 'Pawn' else int(move[start_index + 1]) + 1
-    #         capture_square = f"{capture_file}, {capture_rank}"
-    #         return f"{piece} on {start_file}, {start_rank} captures en passant on {capture_square} and moves to {destination} {check}"
-    #
-    #     # If none of the above conditions are met, it's a regular move
-    #     return f"{piece} on {start_file}, {start_rank} moves to {destination} {check}"
 
     def isMoveValid(self):
         moved = False

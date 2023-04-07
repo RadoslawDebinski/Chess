@@ -203,8 +203,8 @@ class UI(QMainWindow):
         # Get the text from the textEdit widget
         text = self.textEdit.toPlainText()
         engine = TextEngine(self.boardSet, self.GS)
-        # print(engine.algebraic_to_long_notation(text))
-        if engine.proceedData(text.lower()):
+
+        if engine.algebraicToLongNotation(text):
             valid, self.boardSet, self.GS = engine.isMoveValid()
             if valid:
                 self.textEdit.clear()
@@ -214,7 +214,7 @@ class UI(QMainWindow):
                 self.textEdit.setText("Unacceptable move insert new one")
         else:
             self.textEdit.clear()
-            self.textEdit.setText("This is not move")
+            self.textEdit.setText("This is not valid move")
 
     def checkMates(self):
         if self.GS.checkKingL:

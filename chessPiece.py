@@ -44,13 +44,9 @@ class ChessPiece(QGraphicsItem):
                 movesFrom = self.GS.validMovesFrom
 
                 pieceLoc = np.array([self.y, self.x])
-                i = 0
                 fromIdx = []
                 # Finding indexes of valid moves for our piece
-                for loc in movesFrom:
-                    if loc[0] == pieceLoc[0] and loc[1] == pieceLoc[1]:
-                        fromIdx.append(i)
-                    i += 1
+                fromIdx = [i for i, loc in enumerate(movesFrom) if loc[0] == pieceLoc[0] and loc[1] == pieceLoc[1]]
                 # Generating all valid coordinates for piece move
                 self.movesTo = self.GS.validMovesTo
                 self.movesTo = np.take(self.movesTo, fromIdx, axis=0)
