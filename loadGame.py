@@ -186,7 +186,7 @@ class UI(QMainWindow):
         # Clear any previously shown hints
         [hint.hide() for hint in self.hints]
         self.hints = []
-        self.hints = list(map(lambda hintCoord: self.createHintLabel(hintCoord), hintTo))
+        self.hints = [self.createHintLabel(hintCoord) for hintCoord in hintTo]
 
     def createHintLabel(self, hintCoord):
         hintLabel = QLabel(self.view)
@@ -203,6 +203,7 @@ class UI(QMainWindow):
         # Get the text from the textEdit widget
         text = self.textEdit.toPlainText()
         engine = TextEngine(self.boardSet, self.GS)
+        print(engine.algebraic_to_long_notation(text))
         if engine.proceedData(text.lower()):
             valid, self.boardSet, self.GS = engine.isMoveValid()
             if valid:

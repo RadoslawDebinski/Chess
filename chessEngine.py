@@ -1,5 +1,6 @@
 import numpy as np
 import copy
+from itertools import zip_longest
 
 
 class ChessEngine:
@@ -7,29 +8,28 @@ class ChessEngine:
         self.boardSet = boardSet
         self.GS = GS
         n = 8
-        self.squareSet = [self.boardSet[i:i + n] for i in range(0, len(self.boardSet), n)]
+        self.squareSet = [list(t) for t in zip_longest(*[iter(self.boardSet)]*n, fillvalue=None)]
 
     def genValidMoves(self):
         # calling functions for each piece on board and adding valid moves to list
-        for r in range(len(self.squareSet)):
-            for c in range(len(self.squareSet[r])):
-                match self.squareSet[r][c].lower():
-                    case 'r':
-                        self.rook(r, c)
-                    case 'n':
-                        self.knight(r, c)
-                    case 'b':
-                        self.bishop(r, c)
-                    case 'q':
-                        self.queen(r, c)
-                    case 'k':
-                        if self.squareSet[r][c].islower():
-                            self.GS.kingDLoc = [r, c]
-                        else:
-                            self.GS.kingLLoc = [r, c]
-                        self.king(r, c)
-                    case 'p':
-                        self.pawn(r, c)
+        actions = {
+            'r': self.rook,
+            'n': self.knight,
+            'b': self.bishop,
+            'q': self.queen,
+            'k': self.king,
+            'p': self.pawn
+        }
+        # call of function for each piece by list comprehension
+        [[actions.get(piece.lower())(r, c) if (piece.lower() in actions and piece.islower() == isDark) else None
+          for c, piece in enumerate(row)]
+         for r, row in enumerate(self.squareSet)
+         for isDark in (True, False)]
+
+        king_coords = [(r, c) for r, row in enumerate(self.squareSet) for c, piece in enumerate(row) if
+                       piece.lower() == 'k']
+        self.GS.kingDLoc, self.GS.kingLLoc = king_coords if len(king_coords) == 2 else (None, None)
+
         # Separated list for dark and light to check castling
         self.separateMoves()
         # Short castling check
@@ -47,6 +47,7 @@ class ChessEngine:
     def rook(self, r, c):
         startPiece = self.squareSet[r][c]
         directions = ((-1, 0), (0, -1), (1, 0), (0, 1))
+        # Iteration over 4 possible directions for rook
         for d in directions:
             for i in range(1, 8):
                 endRow = r + d[0] * i
@@ -72,6 +73,7 @@ class ChessEngine:
     def knight(self, r, c):
         startPiece = self.squareSet[r][c]
         knightMoves = ((-2, -1), (-2, 1), (-1, -2), (-1, 2), (1, -2), (1, 2), (2, -1), (2, 1))
+        # Iteration over 8 possible positions for knight
         for m in knightMoves:
             endRow = r + m[0]
             endCol = c + m[1]
@@ -91,6 +93,7 @@ class ChessEngine:
     def bishop(self, r, c):
         startPiece = self.squareSet[r][c]
         directions = ((-1, -1), (-1, 1), (1, -1), (1, 1))
+        # Iteration over 4 possible directions for bishop
         for d in directions:
             for i in range(1, 8):
                 endRow = r + d[0] * i
@@ -120,6 +123,7 @@ class ChessEngine:
     def king(self, r, c):
         startPiece = self.squareSet[r][c]
         kingMoves = ((-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1))
+        # Iteration over 8 possible positions for rook
         for i in range(8):
             endRow = r + kingMoves[i][0]
             endCol = c + kingMoves[i][1]
@@ -206,13 +210,14 @@ class ChessEngine:
                         self.GS.validMovesTo = np.vstack((self.GS.validMovesTo, [r + 1, c + 1]))
 
     def separateMoves(self):
-        for i, j in zip(self.GS.validMovesFrom, self.GS.validMovesTo):
-            if self.squareSet[i[0]][i[1]].islower():
-                self.GS.validMovesFromDark = np.vstack((self.GS.validMovesFromDark, i))
-                self.GS.validMovesToDark = np.vstack((self.GS.validMovesToDark, j))
-            elif self.squareSet[i[0]][i[1]].isupper():
-                self.GS.validMovesFromLight = np.vstack((self.GS.validMovesFromLight, i))
-                self.GS.validMovesToLight = np.vstack((self.GS.validMovesToLight, j))
+        self.GS.validMovesFromDark = np.array(
+            [i for i in self.GS.validMovesFrom if self.squareSet[i[0]][i[1]].islower()])
+        self.GS.validMovesToDark = np.array(
+            [j for i, j in zip(self.GS.validMovesFrom, self.GS.validMovesTo) if self.squareSet[i[0]][i[1]].islower()])
+        self.GS.validMovesFromLight = np.array(
+            [i for i in self.GS.validMovesFrom if self.squareSet[i[0]][i[1]].isupper()])
+        self.GS.validMovesToLight = np.array(
+            [j for i, j in zip(self.GS.validMovesFrom, self.GS.validMovesTo) if self.squareSet[i[0]][i[1]].isupper()])
 
     def shortCastling(self, r, c):
         r = 7 if self.squareSet[r][c].isupper() else 0

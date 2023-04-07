@@ -3,6 +3,7 @@ from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 from chessPiece import ChessPiece
 from PyQt5.QtCore import QPoint, pyqtSignal
+import numpy as np
 
 
 class ChessBoard(QGraphicsScene):
@@ -14,19 +15,14 @@ class ChessBoard(QGraphicsScene):
         self.boardSet = boardset
         self.setSceneRect(0, 0, 800, 800)
         self.variant = variant
-        self.chessPieces = []
 
         cordX = 0
         cordY = 0
         # Locating pieces on board
-        for pieceType in self.boardSet:
-            chessPiece = ChessPiece(pieceType, cordX, cordY, self.variant, self.boardSet, UI, GS)
-            self.chessPieces.append(chessPiece)
-            self.addItem(chessPiece)
-            cordX += 1
-            if cordX == 8:
-                cordX = 0
-                cordY += 1
+        x, y = np.meshgrid(np.arange(8), np.arange(8))
+        indexes = np.column_stack((x.ravel(), y.ravel()))
+        [self.addItem(ChessPiece(pieceType, cords[0], cords[1], self.variant, self.boardSet, UI, GS)) for
+         pieceType, cords in zip(self.boardSet, indexes)]
 
     def mousePressEvent(self, event):
         if event.button() == Qt.RightButton:
