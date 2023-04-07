@@ -203,7 +203,7 @@ class UI(QMainWindow):
         # Get the text from the textEdit widget
         text = self.textEdit.toPlainText()
         engine = TextEngine(self.boardSet, self.GS)
-        print(engine.algebraic_to_long_notation(text))
+        # print(engine.algebraic_to_long_notation(text))
         if engine.proceedData(text.lower()):
             valid, self.boardSet, self.GS = engine.isMoveValid()
             if valid:
