@@ -20,7 +20,7 @@ stockPath = "stockfish-11-win\\Windows\\stockfish_20011801_x64.exe"
 
 
 class UI(QMainWindow):
-    def __init__(self, variant):
+    def __init__(self, variant, ):
         super(UI, self).__init__()
 
         # Variables for hints
@@ -90,7 +90,8 @@ class UI(QMainWindow):
         self.clock2.setLayout(clockBoxLight)
 
         # Initial board set
-        self.variant = variant
+
+        self.variant = variant if variant != '' else 's'
         engine = StockEngine(stockPath)
         boardSet = engine.getPureBoard()
         self.boardSet = boardSet

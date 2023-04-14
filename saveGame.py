@@ -59,7 +59,7 @@ class SaveGame:
         tree.write(f'saves\\{self.filename}.xml')
 
     def createJson(self):
-        with open(f'saves\\{self.filename}.json', 'w') as file:
+        with open(f'configs\\{self.filename}.json', 'w') as file:
             json.dump(self.variant, file)
 
 
