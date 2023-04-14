@@ -14,6 +14,7 @@ from gamesStatus import GameStatus
 import time
 from textEngine import TextEngine
 from chessClock import ChessClock
+from saveGame import SaveGame
 
 stockPath = "stockfish-11-win\\Windows\\stockfish_20011801_x64.exe"
 
@@ -44,6 +45,7 @@ class UI(QMainWindow):
         self.mateDark = self.findChild(QPushButton, "pushButton_2")
         self.startButton = self.findChild(QPushButton, "startButton")
         self.resetButton = self.findChild(QPushButton, "resetButton")
+        self.saveButton = self.findChild(QPushButton, "pushButton_5")
 
         # Initial textEdit message
         self.textEdit.setText("Here insert move")
@@ -59,6 +61,7 @@ class UI(QMainWindow):
         self.textEdit.textChanged.connect(self.onTextChanged)
         self.resetButton.clicked.connect(self.resetGame)
         self.startButton.clicked.connect(self.startGame)
+        self.saveButton.clicked.connect(self.saveGame)
 
         # Create an event loop
         # self.loop = QEventLoop()
@@ -146,6 +149,9 @@ class UI(QMainWindow):
         self.textEdit.setEnabled(True)
         self.clockLight.timer.start(1)
         self.startButton.setEnabled(False)
+
+    def saveGame(self):
+        SaveGame(self.GS, self.variant)
 
     def resetGame(self):
         time.sleep(1)
