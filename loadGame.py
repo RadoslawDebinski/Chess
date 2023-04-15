@@ -170,7 +170,7 @@ class UI(QMainWindow):
     def resetGame(self):
         time.sleep(1)
         # Create a new instance of the UI class
-        new_instance = UI(self.variant)
+        new_instance = UI(self.variant, self.historySource)
         # Close the current instance
         self.close()
 

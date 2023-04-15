@@ -13,26 +13,31 @@ class Player:
         tree = ET.parse(f'saves\\{source}')
         root = tree.getroot()
 
-        # Extract list data
-        list1 = []
-        list2 = []
+        movesFrom = [[int(itemElem.text) for itemElem in sublistElem.findall('position')] for sublistElem in
+                     root.find('movesFrom').findall('move')]
 
-        for sublist_elem in root.find('movesFrom').findall('move'):
-            sublist = []
-            for item_elem in sublist_elem.findall('position'):
-                sublist.append(int(item_elem.text))
-            list1.append(sublist)
+        movesTo = [[int(itemElem.text) for itemElem in sublistElem.findall('position')] for sublistElem in
+                   root.find('movesTo').findall('move')]
 
-        for sublist_elem in root.find('movesTo').findall('move'):
-            sublist = []
-            for item_elem in sublist_elem.findall('position'):
-                sublist.append(int(item_elem.text))
-            list2.append(sublist)
-
-        [self.move(UI, fMove[0], fMove[1], tMove[0], tMove[1]) for fMove, tMove in zip(list1, list2)]
+        [self.move(UI, fMove[0], fMove[1], tMove[0], tMove[1]) for fMove, tMove in zip(movesFrom, movesTo)]
 
     def playDB(self, UI, source):
-        pass
+        # Connect to database
+        conn = sqlite3.connect(f'saves\\{source}')
+
+        # Create a cursor
+        c = conn.cursor()
+
+        # Execute a SELECT statement to retrieve data from the database
+        c.execute('SELECT * FROM myTable')
+
+        # Fetch all the data from the database
+        data = c.fetchall()
+
+        [self.move(UI, move[0], move[1], move[2], move[3]) for move in data]
+
+        # Close the connection
+        conn.close()
 
     def move(self, UI, prevRow, prevCol, newRow, newCol):
         engine = ChessEngine(UI.boardSet, UI.GS)
