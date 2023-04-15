@@ -15,14 +15,15 @@ import time
 from textEngine import TextEngine
 from chessClock import ChessClock
 from saveGame import SaveGame
+from playBackGame import Player
 
 stockPath = "stockfish-11-win\\Windows\\stockfish_20011801_x64.exe"
 
 
 class UI(QMainWindow):
-    def __init__(self, variant, ):
+    def __init__(self, variant, historySource):
         super(UI, self).__init__()
-
+        self.historySource = historySource
         # Variables for hints
         hintPath = f":/hint/transparent"
         self.pixmap = QPixmap(hintPath)
@@ -91,7 +92,7 @@ class UI(QMainWindow):
 
         # Initial board set
 
-        self.variant = variant if variant != '' else 's'
+        self.variant = variant
         engine = StockEngine(stockPath)
         boardSet = engine.getPureBoard()
         self.boardSet = boardSet
@@ -144,12 +145,24 @@ class UI(QMainWindow):
         # Show the app
         self.show()
 
+    def playBackHistory(self, historySource):
+        if historySource:
+            if historySource[-4:] == '.xml':
+                Player().playXML(self, historySource)
+            if historySource[-3:] == '.db':
+                Player().playDB(self, historySource)
+
     def startGame(self):
+        self.playBackHistory(self.historySource)
         self.board.setEnabled(True)
         self.submitButton.setEnabled(True)
         self.textEdit.setEnabled(True)
+        self.resetButton.setEnabled(True)
+        self.saveButton.setEnabled(True)
+        self.reverseButton.setEnabled(True)
         self.clockLight.timer.start(1)
         self.startButton.setEnabled(False)
+
 
     def saveGame(self):
         SaveGame(self.GS, self.variant)
@@ -165,6 +178,10 @@ class UI(QMainWindow):
         self.board.setEnabled(False)
         self.submitButton.setEnabled(False)
         self.textEdit.setEnabled(False)
+        self.resetButton.setEnabled(False)
+        self.saveButton.setEnabled(False)
+        self.reverseButton.setEnabled(False)
+
 
     def onReverse(self):
         if self.GS.side == 'l':
@@ -175,14 +192,6 @@ class UI(QMainWindow):
             self.clockLight.timer.stop()
             self.clockDark.timer.start(1)
             self.clockMemory = 'l'
-        # Unable buttons
-        # self.board.setEnabled(True)
-        # self.submitButton.setEnabled(True)
-        # self.textEdit.setEnabled(True)
-
-        # Exit the event loop when the ReverseButton is clicked
-        # if self.loop.isRunning():
-        #     self.loop.exit()
 
     def onTextChanged(self):
         text = self.textEdit.toPlainText()
@@ -274,11 +283,6 @@ class UI(QMainWindow):
         self.GS = engine.checkMates(self.GS)
         self.checkMates()
         self.view.setScene(ChessBoard(self.boardSet, self.variant, self, self.GS))
-        # Disable all elements of scene other than onReverse button
-        # self.disableScene()
-        # Wait for the ReverseButton to be clicked
-        # self.loop.exec()
-
 
     def showContextMenu(self, pos):
         # Create right-click menu with rotate options
@@ -332,22 +336,6 @@ class UI(QMainWindow):
         # Define a callback function for when a button is clicked
         button_text = ""
 
-        def on_button_click():
-            # Get the text label of the clicked button
-            self.GS.newFig = promMenu.sender().text()[0]
-            # Close the menu window
-            promMenu.hide()
-
-        # Connect the callback function to each button's clicked signal
-        button1.clicked.connect(on_button_click)
-        button2.clicked.connect(on_button_click)
-        button3.clicked.connect(on_button_click)
-        button4.clicked.connect(on_button_click)
-
-        # Show the menu window
-        promMenu.exec_()
-        # Start the application event loop
-
     def changeBoardStyle(self):
         # Change the ChessBoard background color
         if self.variant == 's':
@@ -368,5 +356,5 @@ class UI(QMainWindow):
 # Initialize the App
 if __name__ == '__main__':
     app = QApplication(sys.argv)
-    UIWindow = UI('s')
+    UIWindow = UI('s', '')
     app.exec_()

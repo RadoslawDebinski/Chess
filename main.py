@@ -24,7 +24,7 @@ class InputUI(QMainWindow):
         self.loadConfig = self.findChild(QComboBox, "comboBox_3")
         self.applyButton = self.findChild(QPushButton, "pushButton")
         # Set up mask
-        self.lineEdit.setInputMask('000.000.000.000:00000')
+        self.lineEdit.setInputMask('000.000.000.000:00000;_')
         # Set up choices for history
         folderPath = 'saves'
         fileNames = [f for f in os.listdir(folderPath) if os.path.isfile(os.path.join(folderPath, f))]
@@ -47,10 +47,13 @@ class InputUI(QMainWindow):
         historySource = self.loadHistory.currentText()
         configSource = self.loadConfig.currentText()
         # Get config from source
-        with open(f'configs\\{configSource}', 'r') as file:
-            data = json.load(file)
+        if configSource != '':
+            with open(f'configs\\{configSource}', 'r') as file:
+                conf = json.load(file)
+        else:
+            conf = 's'
 
-        UI(data)
+        UI(conf, historySource)
 
 
 # Initialize the App

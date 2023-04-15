@@ -26,13 +26,15 @@ class SaveGame:
         c.execute('CREATE TABLE myTable (fromRow INTEGER, fromCol INTEGER, toRow INTEGER, toCol INTEGER)')
 
         # Insert data
-        for i in range(len(self.GS.stackFrom)):
-            row = self.GS.stackFrom[i] + self.GS.stackTo[i]
-            c.execute('INSERT INTO myTable (fromRow, fromCol, toRow, toCol) VALUES (?, ?, ?, ?)', row)
+        [self.insertInto(c, i) for i in range(len(self.GS.stackFrom))]
 
         # Save changes and close connection
         conn.commit()
         conn.close()
+
+    def insertInto(self, c, i):
+        row = self.GS.stackFrom[i] + self.GS.stackTo[i]
+        c.execute('INSERT INTO myTable (fromRow, fromCol, toRow, toCol) VALUES (?, ?, ?, ?)', row)
 
     def createXML(self):
         # Create root element
