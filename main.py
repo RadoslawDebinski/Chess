@@ -46,6 +46,8 @@ class InputUI(QMainWindow):
         # Get dirs from Input UI
         historySource = self.loadHistory.currentText()
         configSource = self.loadConfig.currentText()
+        # tcpIp = self.lineEdit.text()
+        tcpIp = '192.168.18.106:5002'
         # Get config from source
         if configSource != '':
             with open(f'configs\\{configSource}', 'r') as file:
@@ -53,8 +55,7 @@ class InputUI(QMainWindow):
         else:
             conf = 's'
 
-        UI(conf, historySource)
-
+        UI(conf, historySource, tcpIp)
 
 # Initialize the App
 if __name__ == '__main__':

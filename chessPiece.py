@@ -87,6 +87,7 @@ class ChessPiece(QGraphicsItem):
             self.GS.stackFrom.append([prevPosIdy, prevPosIdx])
             self.GS.stackTo.append([newPosRow, newPosCol])
             self.GS.changeSide()
+            self.UI.sendMessage(prevPosIdy, prevPosIdx, newPosRow, newPosCol)
         # Report check
         self.GS.clearStatus()
         self.GS = engine.checkCheck(self.boardSet, self.GS)

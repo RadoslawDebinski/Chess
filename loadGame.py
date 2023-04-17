@@ -1,3 +1,6 @@
+import socket
+import threading
+
 from PyQt5.QtWidgets import QGroupBox, QPushButton, QTextEdit, QMenu
 from PyQt5.QtGui import QPixmap, QBrush
 
@@ -21,13 +24,14 @@ stockPath = "stockfish-11-win\\Windows\\stockfish_20011801_x64.exe"
 
 
 class UI(QMainWindow):
-    def __init__(self, variant, historySource):
+    def __init__(self, variant, historySource, tcpIp):
         super(UI, self).__init__()
         self.historySource = historySource
         # Variables for hints
         hintPath = f":/hint/transparent"
         self.pixmap = QPixmap(hintPath)
         self.hints = []
+        self.tcpIp = tcpIp
 
         # Load the ui file
         uic.loadUi("loadui.ui", self)
@@ -144,6 +148,15 @@ class UI(QMainWindow):
 
         # Show the app
         self.show()
+        ip = tcpIp[:15]
+        port = tcpIp[15:]
+        ip = '...'
+        port = ...
+        self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.client_socket.connect((ip, int(port)))
+
+        receiveThread = threading.Thread(target=self.receiveMess)
+        receiveThread.start()
 
     def playBackHistory(self, historySource):
         if historySource:
@@ -151,6 +164,27 @@ class UI(QMainWindow):
                 Player().playXML(self, historySource)
             if historySource[-3:] == '.db':
                 Player().playDB(self, historySource)
+
+    def receiveMess(self):
+        while True:
+            data = self.client_socket.recv(1024).decode()
+            print(data)
+            ranks = {'1': 7, '2': 6, '3': 5, '4': 4, '5': 3, '6': 2, '7': 1, '8': 0}
+            files = {'a': 0, 'b': 1, 'c': 2, 'd': 3, 'e': 4, 'f': 5, 'g': 6, 'h': 7}
+            rowFrom, colFrom, rowTo, colTo = files[data[0]], ranks[data[1]], files[data[2]], ranks[data[3]]
+            Player().move(self, colFrom, rowFrom, colTo, rowTo)
+
+    def sendMessage(self, rowFrom, colFrom, rowTo, colTo):
+        ranks = {'1': 7, '2': 6, '3': 5, '4': 4, '5': 3, '6': 2, '7': 1, '8': 0}
+        files = {'a': 0, 'b': 1, 'c': 2, 'd': 3, 'e': 4, 'f': 5, 'g': 6, 'h': 7}
+        # Send
+        # Generate inverse dictionaries
+        ranks = {v: k for k, v in ranks.items()}
+        files = {v: k for k, v in files.items()}
+
+        rowFrom, colFrom, rowTo, colTo = files[colFrom], ranks[rowFrom], files[colTo], ranks[rowTo]
+        print(f'{rowFrom}{colFrom}{rowTo}{colTo}')
+        self.client_socket.send(f'{rowFrom}{colFrom}{rowTo}{colTo}'.encode())
 
     def startGame(self):
         self.playBackHistory(self.historySource)
