@@ -1,3 +1,5 @@
+import time
+
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
@@ -23,6 +25,18 @@ class ChessBoard(QGraphicsScene):
         indexes = np.column_stack((x.ravel(), y.ravel()))
         [self.addItem(ChessPiece(pieceType, cords[0], cords[1], self.variant, self.boardSet, UI, GS)) for
          pieceType, cords in zip(self.boardSet, indexes)]
+        for item in self.items():
+            if isinstance(item, ChessPiece):
+                # item.setPos(item.windX/100, item.windY/100)
+                print(f'{item.pos().x(), item.pos().y()}')
+                print(f'{item.pixmap().toImage()}')
+                file_path = ":/swears"
+                saved = item.pixmap().toImage().save(f'{file_path}/{str(time.time() * 1000)}')
+                # item.paint()
+                # pixmap = item.pixmap()
+                # if pixmap:
+                #     image_path = pixmap.fileName()
+                #     print(f"my_pixmap_item image path: {image_path}")
 
     def mousePressEvent(self, event):
         if event.button() == Qt.RightButton:

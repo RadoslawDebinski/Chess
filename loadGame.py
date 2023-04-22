@@ -1,6 +1,7 @@
 import socket
 import threading
 
+import numpy as np
 from PyQt5.QtWidgets import QGroupBox, QPushButton, QTextEdit, QMenu
 from PyQt5.QtGui import QPixmap, QBrush
 
@@ -24,14 +25,13 @@ stockPath = "stockfish-11-win\\Windows\\stockfish_20011801_x64.exe"
 
 
 class UI(QMainWindow):
-    def __init__(self, variant, historySource, tcpIp):
+    def __init__(self, variant, historySource, tcpIp, gameMode):
         super(UI, self).__init__()
         self.historySource = historySource
         # Variables for hints
         hintPath = f":/hint/transparent"
         self.pixmap = QPixmap(hintPath)
         self.hints = []
-        self.tcpIp = tcpIp
 
         # Load the ui file
         uic.loadUi("loadui.ui", self)
@@ -148,15 +148,20 @@ class UI(QMainWindow):
 
         # Show the app
         self.show()
-        ip = tcpIp[:15]
-        port = tcpIp[15:]
-        ip = '...'
-        port = ...
-        self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.client_socket.connect((ip, int(port)))
+        # Multiplayer connection data
+        self.tcpIp = tcpIp
+        self.gameMode = gameMode
+        if gameMode:
+            # ip = tcpIp[:15]
+            # port = tcpIp[16:]
+            tcpIp = '192.168.0.18:58132'
+            ip = socket.gethostname()  # as both code is running on same pc
+            port = tcpIp[13:]
+            self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.client_socket.connect((ip, int(port)))
 
-        receiveThread = threading.Thread(target=self.receiveMess)
-        receiveThread.start()
+            receiveThread = threading.Thread(target=self.receiveMess)
+            receiveThread.start()
 
     def playBackHistory(self, historySource):
         if historySource:
@@ -172,19 +177,52 @@ class UI(QMainWindow):
             ranks = {'1': 7, '2': 6, '3': 5, '4': 4, '5': 3, '6': 2, '7': 1, '8': 0}
             files = {'a': 0, 'b': 1, 'c': 2, 'd': 3, 'e': 4, 'f': 5, 'g': 6, 'h': 7}
             rowFrom, colFrom, rowTo, colTo = files[data[0]], ranks[data[1]], files[data[2]], ranks[data[3]]
-            Player().move(self, colFrom, rowFrom, colTo, rowTo)
+            self.moveTCPIP(colFrom, rowFrom, colTo, rowTo)
+
+    def moveTCPIP(self, prevRow, prevCol, newRow, newCol):
+        movesFrom = self.GS.validMovesFrom
+
+        pieceLoc = np.array([prevRow, prevCol])
+        fromIdx = []
+        # Finding indexes of valid moves for our piece
+        fromIdx = [i for i, loc in enumerate(movesFrom) if loc[0] == pieceLoc[0] and loc[1] == pieceLoc[1]]
+        # Generating all valid coordinates for piece move
+        movesTo = self.GS.validMovesTo
+        movesTo = np.take(movesTo, fromIdx, axis=0)
+        # Showing hints for user
+        # UI.showHints(movesTo)
+
+        where = None
+        try:
+            where = movesTo.tolist().index([newRow, newCol])
+        except ValueError:
+            where = None
+
+        engine = ChessEngine(self.boardSet, self.GS)
+        if where is not None:
+            self.boardSet, self.GS = engine.move(prevRow, prevCol, movesTo[where][0], movesTo[where][1])
+            # Game stack update
+            self.GS.stackFrom.append([prevRow, prevCol])
+            self.GS.stackTo.append([newRow, newCol])
+            self.GS.changeSide()
+        # Report check
+        self.GS.clearStatus()
+        self.GS = engine.checkCheck(self.boardSet, self.GS)
+
+        self.onPieceReleased(self.boardSet, self.GS)
 
     def sendMessage(self, rowFrom, colFrom, rowTo, colTo):
-        ranks = {'1': 7, '2': 6, '3': 5, '4': 4, '5': 3, '6': 2, '7': 1, '8': 0}
-        files = {'a': 0, 'b': 1, 'c': 2, 'd': 3, 'e': 4, 'f': 5, 'g': 6, 'h': 7}
-        # Send
-        # Generate inverse dictionaries
-        ranks = {v: k for k, v in ranks.items()}
-        files = {v: k for k, v in files.items()}
+        if self.gameMode:
+            ranks = {'1': 7, '2': 6, '3': 5, '4': 4, '5': 3, '6': 2, '7': 1, '8': 0}
+            files = {'a': 0, 'b': 1, 'c': 2, 'd': 3, 'e': 4, 'f': 5, 'g': 6, 'h': 7}
+            # Send
+            # Generate inverse dictionaries
+            ranks = {v: k for k, v in ranks.items()}
+            files = {v: k for k, v in files.items()}
 
-        rowFrom, colFrom, rowTo, colTo = files[colFrom], ranks[rowFrom], files[colTo], ranks[rowTo]
-        print(f'{rowFrom}{colFrom}{rowTo}{colTo}')
-        self.client_socket.send(f'{rowFrom}{colFrom}{rowTo}{colTo}'.encode())
+            rowFrom, colFrom, rowTo, colTo = files[colFrom], ranks[rowFrom], files[colTo], ranks[rowTo]
+            print(f'{rowFrom}{colFrom}{rowTo}{colTo}')
+            self.client_socket.send(f'{rowFrom}{colFrom}{rowTo}{colTo}'.encode())
 
     def startGame(self):
         self.playBackHistory(self.historySource)
@@ -199,12 +237,12 @@ class UI(QMainWindow):
 
 
     def saveGame(self):
-        SaveGame(self.GS, self.variant)
+        SaveGame(self.GS, self.variant, self.tcpIp)
 
     def resetGame(self):
         time.sleep(1)
         # Create a new instance of the UI class
-        new_instance = UI(self.variant, self.historySource)
+        new_instance = UI(self.variant, self.historySource, self.tcpIp, self.gameMode)
         # Close the current instance
         self.close()
 
@@ -316,7 +354,8 @@ class UI(QMainWindow):
         # Report Mates
         self.GS = engine.checkMates(self.GS)
         self.checkMates()
-        self.view.setScene(ChessBoard(self.boardSet, self.variant, self, self.GS))
+        scene = ChessBoard(self.boardSet, self.variant, self, self.GS)
+        self.view.setScene(scene)
 
     def showContextMenu(self, pos):
         # Create right-click menu with rotate options

@@ -46,16 +46,34 @@ class InputUI(QMainWindow):
         # Get dirs from Input UI
         historySource = self.loadHistory.currentText()
         configSource = self.loadConfig.currentText()
-        # tcpIp = self.lineEdit.text()
-        tcpIp = '192.168.18.106:5002'
+        # tcpIp = '192.168.253.106:'
         # Get config from source
-        if configSource != '':
-            with open(f'configs\\{configSource}', 'r') as file:
-                conf = json.load(file)
-        else:
-            conf = 's'
-
-        UI(conf, historySource, tcpIp)
+        # Single player mode
+        if self.singleButton.isChecked():
+            # Variant from config source
+            if configSource != '':
+                with open(f'configs\\{configSource}', 'r') as file:
+                    conf = json.load(file)
+                    variant, = conf.split('\n')
+                    tcpIp = None
+            # Variant default
+            else:
+                variant = 's'
+                tcpIp = None
+            UI(variant, historySource, tcpIp, False)
+        # Multi player mode
+        if self.multiButton.isChecked():
+            # Variant, IP, Port from config source
+            if configSource != '':
+                with open(f'configs\\{configSource}', 'r') as file:
+                    conf = json.load(file)
+                    variant, tcpIp = conf.split('\n')
+            # Variant default, IP/Port from user
+            else:
+                variant = 's'
+                tcpIp = self.lineEdit.text()
+            UI(variant, historySource, tcpIp, True)
+            UI(variant, historySource, tcpIp, True)
 
 # Initialize the App
 if __name__ == '__main__':

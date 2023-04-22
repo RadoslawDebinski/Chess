@@ -6,9 +6,10 @@ import json
 
 
 class SaveGame:
-    def __init__(self, GS, variant):
+    def __init__(self, GS, variant, tcpIP):
         self.GS = GS
         self.variant = variant
+        self.tcpIP = tcpIP
         # Create file name from current date
         now = datetime.now()  # get the current date and time
         formatted_date = now.strftime("%Y-%m-%d-%H-%M-%S")  # format the date and time as a string
@@ -62,7 +63,7 @@ class SaveGame:
 
     def createJson(self):
         with open(f'configs\\{self.filename}.json', 'w') as file:
-            json.dump(self.variant, file)
+            json.dump(f'{self.variant}\n{self.tcpIP}', file)
 
 
 

@@ -6,7 +6,7 @@ from chessEngine import ChessEngine
 import numpy as np
 
 
-class ChessPiece(QGraphicsItem):
+class ChessPiece(QGraphicsPixmapItem):
     def __init__(self, name, x, y, variant, boardSet, UI, GS):
         super().__init__()
         self.UI = UI
@@ -19,9 +19,11 @@ class ChessPiece(QGraphicsItem):
         self.boardSet = boardSet
         self.color = ''
         self.image = QImage()
-        self.setFlag(QGraphicsItem.ItemIsMovable, False)
+        self.setFlag(QGraphicsPixmapItem.ItemIsMovable, False)
         self.movesTo = []
         self.GS = GS
+
+        self.setZValue(1)
 
         # Setting piece color by letter size
         if self.name == ' ':
@@ -36,9 +38,12 @@ class ChessPiece(QGraphicsItem):
         imgPath = f":/{self.color}{self.variant}/{self.name.lower()}"
         self.image = QImage(imgPath)
 
+        self.setPixmap(QPixmap(imgPath))
+        self.setPos(self.windX, self.windY)
+
     def mousePressEvent(self, event):
         if self.color == self.GS.side:
-            self.setFlag(QGraphicsItem.ItemIsMovable, True)
+            self.setFlag(QGraphicsPixmapItem.ItemIsMovable, True)
             if event.button() == Qt.LeftButton:
                 self.setCursor(Qt.ClosedHandCursor)
                 movesFrom = self.GS.validMovesFrom
@@ -93,8 +98,9 @@ class ChessPiece(QGraphicsItem):
         self.GS = engine.checkCheck(self.boardSet, self.GS)
         return True
 
-    def boundingRect(self):
-        return QRectF(self.windX, self.windY, 100, 100)
-
-    def paint(self, painter, option, widget):
-        painter.drawImage(self.windX, self.windY, self.image)
+    # def boundingRect(self):
+    #     return QRectF(self.windX, self.windY, 100, 100)
+    # 
+    # def paint(self, painter, option, widget):
+    #     painter.drawImage(self.windX, self.windY, self.image)
+    #     print(self.windX, self.windY)

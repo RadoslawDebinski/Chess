@@ -1,5 +1,8 @@
 import sqlite3
 import xml.etree.ElementTree as ET
+
+import numpy as np
+
 from chessEngine import ChessEngine
 import time
 
