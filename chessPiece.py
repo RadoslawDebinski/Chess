@@ -4,9 +4,10 @@ from PyQt5.QtCore import *
 import chessGraphics
 from chessEngine import ChessEngine
 import numpy as np
+import time
 
 
-class ChessPiece(QGraphicsPixmapItem):
+class ChessPiece(QGraphicsItem):
     def __init__(self, name, x, y, variant, boardSet, UI, GS):
         super().__init__()
         self.UI = UI
@@ -19,11 +20,10 @@ class ChessPiece(QGraphicsPixmapItem):
         self.boardSet = boardSet
         self.color = ''
         self.image = QImage()
-        self.setFlag(QGraphicsPixmapItem.ItemIsMovable, False)
+        self.setFlag(QGraphicsItem.ItemIsMovable, False)
         self.movesTo = []
         self.GS = GS
-
-        self.setZValue(1)
+        self.remoteDirection = QPoint(0, 0)
 
         # Setting piece color by letter size
         if self.name == ' ':
@@ -38,36 +38,43 @@ class ChessPiece(QGraphicsPixmapItem):
         imgPath = f":/{self.color}{self.variant}/{self.name.lower()}"
         self.image = QImage(imgPath)
 
-        self.setPixmap(QPixmap(imgPath))
-        self.setPos(self.windX, self.windY)
-
     def mousePressEvent(self, event):
         if self.color == self.GS.side:
-            self.setFlag(QGraphicsPixmapItem.ItemIsMovable, True)
-            if event.button() == Qt.LeftButton:
-                self.setCursor(Qt.ClosedHandCursor)
-                movesFrom = self.GS.validMovesFrom
-
-                pieceLoc = np.array([self.y, self.x])
-                fromIdx = []
-                # Finding indexes of valid moves for our piece
-                fromIdx = [i for i, loc in enumerate(movesFrom) if loc[0] == pieceLoc[0] and loc[1] == pieceLoc[1]]
-                # Generating all valid coordinates for piece move
-                self.movesTo = self.GS.validMovesTo
-                self.movesTo = np.take(self.movesTo, fromIdx, axis=0)
-                # Showing hints for user
-                self.UI.showHints(self.movesTo)
+            self.setFlag(QGraphicsItem.ItemIsMovable, True)
+            # if event.button() == Qt.LeftButton:
+            self.setCursor(Qt.ClosedHandCursor)
+            movesFrom = self.GS.validMovesFrom
+            print(f'Im pressed at:{time.time()}')
+            pieceLoc = np.array([self.y, self.x])
+            fromIdx = []
+            # Finding indexes of valid moves for our piece
+            fromIdx = [i for i, loc in enumerate(movesFrom) if loc[0] == pieceLoc[0] and loc[1] == pieceLoc[1]]
+            # Generating all valid coordinates for piece move
+            self.movesTo = self.GS.validMovesTo
+            self.movesTo = np.take(self.movesTo, fromIdx, axis=0)
+            # Showing hints for user
+            self.UI.showHints(self.movesTo)
 
     def mouseReleaseEvent(self, event):
         if self.color == self.GS.side:
-            if event.button() == Qt.LeftButton:
-                self.setCursor(Qt.OpenHandCursor)
-                # Move the chess piece to the new position
+            # if event.button() == Qt.LeftButton:
+            self.setCursor(Qt.OpenHandCursor)
+            # Move the chess piece to the new position
+            # if isinstance(event, QGraphicsSceneMouseEvent):
+            #     newPos = event.pos()
+            # else:
+
+            if self.UI.remoteAccess:
                 newPos = event.scenePos()
-                # Hiding user hints
-                self.UI.hideHints()
-                if self.isValidPosition(newPos):
-                    self.UI.onPieceReleased(self.boardSet, self.GS)
+                self.UI.remoteAccess = False
+            else:
+                newPos = self.remoteDirection
+                self.UI.remoteAccess = True
+
+            # Hiding user hints
+            self.UI.hideHints()
+            if self.isValidPosition(newPos):
+                self.UI.onPieceReleased(self.boardSet, self.GS)
 
     def isValidPosition(self, newPos):
         # Check if the new position is within the bounds of the chessboard
@@ -98,9 +105,9 @@ class ChessPiece(QGraphicsPixmapItem):
         self.GS = engine.checkCheck(self.boardSet, self.GS)
         return True
 
-    # def boundingRect(self):
-    #     return QRectF(self.windX, self.windY, 100, 100)
-    # 
-    # def paint(self, painter, option, widget):
-    #     painter.drawImage(self.windX, self.windY, self.image)
-    #     print(self.windX, self.windY)
+    def boundingRect(self):
+        return QRectF(self.windX, self.windY, 100, 100)
+
+    def paint(self, painter, option, widget):
+        painter.drawImage(self.windX, self.windY, self.image)
+

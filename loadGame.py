@@ -2,14 +2,17 @@ import socket
 import threading
 
 import numpy as np
+from PyQt5.QtTest import QTest
 from PyQt5.QtWidgets import QGroupBox, QPushButton, QTextEdit, QMenu
 from PyQt5.QtGui import QPixmap, QBrush
+from PyQt5.QtWidgets import QGraphicsSceneMouseEvent
 
 from PyQt5 import uic
 import sys
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
+from PyQt5.QtGui import QMouseEvent
 from chessBoard import ChessBoard
 from stockEngine import StockEngine
 from chessEngine import ChessEngine
@@ -105,13 +108,13 @@ class UI(QMainWindow):
 
         # Set board appearance
         self.view = QGraphicsView(self)
-        board = ChessBoard(self.boardSet, self.variant, self, self.GS)
+        self.piecesBoard = ChessBoard(self.boardSet, self.variant, self, self.GS)
 
         # Generate list of all valid moves
         engine = ChessEngine(self.boardSet, self.GS)
         self.GS = engine.genValidMoves()
 
-        self.view.setScene(board)
+        self.view.setScene(self.piecesBoard)
         self.view.setRenderHint(QPainter.Antialiasing)
         imgPath = f":/board/{self.variant}"
         pixmap = QPixmap(imgPath)
@@ -151,10 +154,11 @@ class UI(QMainWindow):
         # Multiplayer connection data
         self.tcpIp = tcpIp
         self.gameMode = gameMode
+        self.remoteAccess = True
         if gameMode:
             # ip = tcpIp[:15]
             # port = tcpIp[16:]
-            tcpIp = '192.168.0.18:58132'
+            tcpIp = '192.168.0.18:57780'
             ip = socket.gethostname()  # as both code is running on same pc
             port = tcpIp[13:]
             self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -170,6 +174,8 @@ class UI(QMainWindow):
             if historySource[-3:] == '.db':
                 Player().playDB(self, historySource)
 
+    from PyQt5.QtTest import QTest
+
     def receiveMess(self):
         while True:
             data = self.client_socket.recv(1024).decode()
@@ -177,39 +183,27 @@ class UI(QMainWindow):
             ranks = {'1': 7, '2': 6, '3': 5, '4': 4, '5': 3, '6': 2, '7': 1, '8': 0}
             files = {'a': 0, 'b': 1, 'c': 2, 'd': 3, 'e': 4, 'f': 5, 'g': 6, 'h': 7}
             rowFrom, colFrom, rowTo, colTo = files[data[0]], ranks[data[1]], files[data[2]], ranks[data[3]]
-            self.moveTCPIP(colFrom, rowFrom, colTo, rowTo)
+            startPoint = QPoint(colFrom * 100 + 20, rowFrom * 100 + 20)
+            startPoint = QPoint(980, 800)
+            stopPoint = QPoint(rowTo * 100 + 20, colTo * 100 + 20)
+            print(f"Button press at:{startPoint}")
+            pieces = self.piecesBoard.pieces
+            for piece in pieces:
+                if piece.windX == (colFrom * 100 + 20) and (piece.windY == rowFrom * 100 + 20):
+                    self.remoteAccess = False
+                    piece.remoteDirection = stopPoint
+                    # Create a QGraphicsSceneMousePressEvent and set its scene position to the center of the item
+                    press_event = QMouseEvent(QEvent.GraphicsSceneMousePress, piece.boundingRect().center(),
+                                              Qt.LeftButton, Qt.LeftButton, Qt.NoModifier)
 
-    def moveTCPIP(self, prevRow, prevCol, newRow, newCol):
-        movesFrom = self.GS.validMovesFrom
+                    # Create a QGraphicsSceneMouseReleaseEvent and set its scene position to the stop point
+                    release_event = QMouseEvent(QEvent.GraphicsSceneMouseRelease, stopPoint,
+                                                Qt.LeftButton, Qt.LeftButton, Qt.NoModifier)
 
-        pieceLoc = np.array([prevRow, prevCol])
-        fromIdx = []
-        # Finding indexes of valid moves for our piece
-        fromIdx = [i for i, loc in enumerate(movesFrom) if loc[0] == pieceLoc[0] and loc[1] == pieceLoc[1]]
-        # Generating all valid coordinates for piece move
-        movesTo = self.GS.validMovesTo
-        movesTo = np.take(movesTo, fromIdx, axis=0)
-        # Showing hints for user
-        # UI.showHints(movesTo)
-
-        where = None
-        try:
-            where = movesTo.tolist().index([newRow, newCol])
-        except ValueError:
-            where = None
-
-        engine = ChessEngine(self.boardSet, self.GS)
-        if where is not None:
-            self.boardSet, self.GS = engine.move(prevRow, prevCol, movesTo[where][0], movesTo[where][1])
-            # Game stack update
-            self.GS.stackFrom.append([prevRow, prevCol])
-            self.GS.stackTo.append([newRow, newCol])
-            self.GS.changeSide()
-        # Report check
-        self.GS.clearStatus()
-        self.GS = engine.checkCheck(self.boardSet, self.GS)
-
-        self.onPieceReleased(self.boardSet, self.GS)
+                    # Send the press and release events to the item
+                    piece.sceneEvent(press_event)
+                    print(f'Stop point is at:{release_event.pos()}')
+                    piece.sceneEvent(release_event)
 
     def sendMessage(self, rowFrom, colFrom, rowTo, colTo):
         if self.gameMode:
@@ -274,7 +268,7 @@ class UI(QMainWindow):
         # Clear any previously shown hints
         [hint.hide() for hint in self.hints]
         self.hints = []
-        self.hints = [self.createHintLabel(hintCoord) for hintCoord in hintTo]
+        # self.hints = [self.createHintLabel(hintCoord) for hintCoord in hintTo]
 
     def createHintLabel(self, hintCoord):
         hintLabel = QLabel(self.view)
@@ -354,8 +348,8 @@ class UI(QMainWindow):
         # Report Mates
         self.GS = engine.checkMates(self.GS)
         self.checkMates()
-        scene = ChessBoard(self.boardSet, self.variant, self, self.GS)
-        self.view.setScene(scene)
+        self.piecesBoard = ChessBoard(self.boardSet, self.variant, self, self.GS)
+        self.view.setScene(self.piecesBoard)
 
     def showContextMenu(self, pos):
         # Create right-click menu with rotate options
@@ -439,7 +433,8 @@ class UI(QMainWindow):
             self.view.setBackgroundBrush(QBrush(pixmap))
 
         # Reload the ChessBoard with the new background color
-        self.view.setScene(ChessBoard(self.boardSet, self.variant, self, self.GS))
+        self.piecesBoard = ChessBoard(self.boardSet, self.variant, self, self.GS)
+        self.view.setScene(self.piecesBoard)
 
 
 # Initialize the App
