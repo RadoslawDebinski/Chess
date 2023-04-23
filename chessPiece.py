@@ -23,7 +23,6 @@ class ChessPiece(QGraphicsItem):
         self.setFlag(QGraphicsItem.ItemIsMovable, False)
         self.movesTo = []
         self.GS = GS
-        self.remoteDirection = QPoint(0, 0)
 
         # Setting piece color by letter size
         if self.name == ' ':
@@ -41,40 +40,31 @@ class ChessPiece(QGraphicsItem):
     def mousePressEvent(self, event):
         if self.color == self.GS.side:
             self.setFlag(QGraphicsItem.ItemIsMovable, True)
-            # if event.button() == Qt.LeftButton:
-            self.setCursor(Qt.ClosedHandCursor)
-            movesFrom = self.GS.validMovesFrom
-            print(f'Im pressed at:{time.time()}')
-            pieceLoc = np.array([self.y, self.x])
-            fromIdx = []
-            # Finding indexes of valid moves for our piece
-            fromIdx = [i for i, loc in enumerate(movesFrom) if loc[0] == pieceLoc[0] and loc[1] == pieceLoc[1]]
-            # Generating all valid coordinates for piece move
-            self.movesTo = self.GS.validMovesTo
-            self.movesTo = np.take(self.movesTo, fromIdx, axis=0)
-            # Showing hints for user
-            self.UI.showHints(self.movesTo)
+            if event.button() == Qt.LeftButton:
+                self.setCursor(Qt.ClosedHandCursor)
+                movesFrom = self.GS.validMovesFrom
+                print(f'Im pressed at:{time.time()}')
+                pieceLoc = np.array([self.y, self.x])
+                fromIdx = []
+                # Finding indexes of valid moves for our piece
+                fromIdx = [i for i, loc in enumerate(movesFrom) if loc[0] == pieceLoc[0] and loc[1] == pieceLoc[1]]
+                # Generating all valid coordinates for piece move
+                self.movesTo = self.GS.validMovesTo
+                self.movesTo = np.take(self.movesTo, fromIdx, axis=0)
+                # Showing hints for user
+                self.UI.showHints(self.movesTo)
 
     def mouseReleaseEvent(self, event):
         if self.color == self.GS.side:
-            # if event.button() == Qt.LeftButton:
-            self.setCursor(Qt.OpenHandCursor)
-            # Move the chess piece to the new position
-            # if isinstance(event, QGraphicsSceneMouseEvent):
-            #     newPos = event.pos()
-            # else:
+            if event.button() == Qt.LeftButton:
+                self.setCursor(Qt.OpenHandCursor)
 
-            if self.UI.remoteAccess:
                 newPos = event.scenePos()
-                self.UI.remoteAccess = False
-            else:
-                newPos = self.remoteDirection
-                self.UI.remoteAccess = True
 
-            # Hiding user hints
-            self.UI.hideHints()
-            if self.isValidPosition(newPos):
-                self.UI.onPieceReleased(self.boardSet, self.GS)
+                # Hiding user hints
+                self.UI.hideHints()
+                if self.isValidPosition(newPos):
+                    self.UI.onPieceReleased(self.boardSet, self.GS)
 
     def isValidPosition(self, newPos):
         # Check if the new position is within the bounds of the chessboard
@@ -110,4 +100,5 @@ class ChessPiece(QGraphicsItem):
 
     def paint(self, painter, option, widget):
         painter.drawImage(self.windX, self.windY, self.image)
+        print(self.windX, self.windY, self.image)
 

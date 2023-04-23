@@ -17,6 +17,7 @@ class InputUI(QMainWindow):
 
         # Define Our Widgets
         self.lineEdit = self.findChild(QLineEdit, "lineEdit")
+        self.lineEdit2 = self.findChild(QLineEdit, "lineEdit_2")
         self.singleButton = self.findChild(QRadioButton, "radioButton")
         self.multiButton = self.findChild(QRadioButton, "radioButton_2")
         self.aiButton = self.findChild(QRadioButton, "radioButton_3")
@@ -24,7 +25,9 @@ class InputUI(QMainWindow):
         self.loadConfig = self.findChild(QComboBox, "comboBox_3")
         self.applyButton = self.findChild(QPushButton, "pushButton")
         # Set up mask
-        self.lineEdit.setInputMask('000.000.000.000:00000;_')
+        self.lineEdit.setInputMask('HHHH:HHHH:HHHH:HHHH:HHHH:HHHH:HHHH:HHHH;_')
+        # self.lineEdit.setInputMask('000.000.000.000:00000;_')
+        self.lineEdit2.setInputMask('00000')
         # Set up choices for history
         folderPath = 'saves'
         fileNames = [f for f in os.listdir(folderPath) if os.path.isfile(os.path.join(folderPath, f))]
@@ -46,7 +49,6 @@ class InputUI(QMainWindow):
         # Get dirs from Input UI
         historySource = self.loadHistory.currentText()
         configSource = self.loadConfig.currentText()
-        # tcpIp = '192.168.253.106:'
         # Get config from source
         # Single player mode
         if self.singleButton.isChecked():
@@ -71,8 +73,7 @@ class InputUI(QMainWindow):
             # Variant default, IP/Port from user
             else:
                 variant = 's'
-                tcpIp = self.lineEdit.text()
-            UI(variant, historySource, tcpIp, True)
+                tcpIp = self.lineEdit.text()  + "H" + self.lineEdit2.text()
             UI(variant, historySource, tcpIp, True)
 
 # Initialize the App

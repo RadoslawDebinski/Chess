@@ -13,6 +13,7 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import QMouseEvent
+
 from chessBoard import ChessBoard
 from stockEngine import StockEngine
 from chessEngine import ChessEngine
@@ -154,14 +155,10 @@ class UI(QMainWindow):
         # Multiplayer connection data
         self.tcpIp = tcpIp
         self.gameMode = gameMode
-        self.remoteAccess = True
         if gameMode:
-            # ip = tcpIp[:15]
-            # port = tcpIp[16:]
-            tcpIp = '192.168.0.18:57780'
-            ip = socket.gethostname()  # as both code is running on same pc
-            port = tcpIp[13:]
-            self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            ip, port = tcpIp.split('H')
+            # ip, port = tcpIp.split(':')
+            self.client_socket = socket.socket(socket.AF_INET6, socket.SOCK_STREAM)
             self.client_socket.connect((ip, int(port)))
 
             receiveThread = threading.Thread(target=self.receiveMess)
@@ -174,36 +171,26 @@ class UI(QMainWindow):
             if historySource[-3:] == '.db':
                 Player().playDB(self, historySource)
 
-    from PyQt5.QtTest import QTest
-
     def receiveMess(self):
         while True:
             data = self.client_socket.recv(1024).decode()
             print(data)
             ranks = {'1': 7, '2': 6, '3': 5, '4': 4, '5': 3, '6': 2, '7': 1, '8': 0}
             files = {'a': 0, 'b': 1, 'c': 2, 'd': 3, 'e': 4, 'f': 5, 'g': 6, 'h': 7}
-            rowFrom, colFrom, rowTo, colTo = files[data[0]], ranks[data[1]], files[data[2]], ranks[data[3]]
-            startPoint = QPoint(colFrom * 100 + 20, rowFrom * 100 + 20)
-            startPoint = QPoint(980, 800)
-            stopPoint = QPoint(rowTo * 100 + 20, colTo * 100 + 20)
-            print(f"Button press at:{startPoint}")
-            pieces = self.piecesBoard.pieces
-            for piece in pieces:
-                if piece.windX == (colFrom * 100 + 20) and (piece.windY == rowFrom * 100 + 20):
-                    self.remoteAccess = False
-                    piece.remoteDirection = stopPoint
-                    # Create a QGraphicsSceneMousePressEvent and set its scene position to the center of the item
-                    press_event = QMouseEvent(QEvent.GraphicsSceneMousePress, piece.boundingRect().center(),
-                                              Qt.LeftButton, Qt.LeftButton, Qt.NoModifier)
-
-                    # Create a QGraphicsSceneMouseReleaseEvent and set its scene position to the stop point
-                    release_event = QMouseEvent(QEvent.GraphicsSceneMouseRelease, stopPoint,
-                                                Qt.LeftButton, Qt.LeftButton, Qt.NoModifier)
-
-                    # Send the press and release events to the item
-                    piece.sceneEvent(press_event)
-                    print(f'Stop point is at:{release_event.pos()}')
-                    piece.sceneEvent(release_event)
+            colFrom, rowFrom, colTo, rowTo = files[data[0]], ranks[data[1]], files[data[2]], ranks[data[3]]
+            engine = ChessEngine(self.boardSet, self.GS)
+            self.boardSet, self.GS = engine.move(rowFrom, colFrom, rowTo, colTo)
+            # Game stack update
+            self.GS.stackFrom.append([rowFrom, colFrom])
+            self.GS.stackTo.append([rowTo, colTo])
+            self.GS.changeSide()
+            # Report check
+            self.GS.clearStatus()
+            self.GS = engine.checkCheck(self.boardSet, self.GS)
+            # self.onPieceReleased(self.boardSet, self.GS)
+            QMetaObject.invokeMethod(self, "onPieceReleased", Qt.QueuedConnection,
+                                     Q_ARG(type(self.boardSet), self.boardSet),
+                                     Q_ARG(type(self.GS), self.GS))
 
     def sendMessage(self, rowFrom, colFrom, rowTo, colTo):
         if self.gameMode:
@@ -229,7 +216,6 @@ class UI(QMainWindow):
         self.clockLight.timer.start(1)
         self.startButton.setEnabled(False)
 
-
     def saveGame(self):
         SaveGame(self.GS, self.variant, self.tcpIp)
 
@@ -247,7 +233,6 @@ class UI(QMainWindow):
         self.resetButton.setEnabled(False)
         self.saveButton.setEnabled(False)
         self.reverseButton.setEnabled(False)
-
 
     def onReverse(self):
         if self.GS.side == 'l':
@@ -268,7 +253,7 @@ class UI(QMainWindow):
         # Clear any previously shown hints
         [hint.hide() for hint in self.hints]
         self.hints = []
-        # self.hints = [self.createHintLabel(hintCoord) for hintCoord in hintTo]
+        self.hints = [self.createHintLabel(hintCoord) for hintCoord in hintTo]
 
     def createHintLabel(self, hintCoord):
         hintLabel = QLabel(self.view)
@@ -334,6 +319,7 @@ class UI(QMainWindow):
         self.mateLight.repaint()
         self.mateDark.repaint()
 
+    @pyqtSlot(type([]), type(GameStatus))
     def onPieceReleased(self, boardSet, GS):
         self.GS = GS
         self.boardSet = boardSet
