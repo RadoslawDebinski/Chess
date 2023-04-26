@@ -24,14 +24,14 @@ def showContextMenu(self, pos):
 def pawnPromotion(self):
     if any(self.GS.isPromotionL):
         column = self.GS.isPromotionL.index(True)
-        self.createMenu()
+        createMenu(self)
         if self.GS.newFig == 'K':
             self.GS.newFig = 'N'
         self.boardSet[column] = self.GS.newFig
         self.GS.isPromotionL[column] = False
     if any(self.GS.isPromotionD):
         column = self.GS.isPromotionD.index(True)
-        self.createMenu()
+        createMenu(self)
         if self.GS.newFig == 'K':
             self.GS.newFig = 'N'
         self.boardSet[56 + column] = self.GS.newFig.lower()
@@ -61,6 +61,21 @@ def createMenu(self):
 
     # Define a callback function for when a button is clicked
     button_text = ""
+
+    def on_button_click():
+        # Get the text label of the clicked button
+        self.GS.newFig = promMenu.sender().text()[0]
+        # Close the menu window
+        promMenu.hide()
+
+    # Connect the callback function to each button's clicked signal
+    button1.clicked.connect(on_button_click)
+    button2.clicked.connect(on_button_click)
+    button3.clicked.connect(on_button_click)
+    button4.clicked.connect(on_button_click)
+
+    # Show the menu window
+    promMenu.exec_()
 
 
 def changeBoardStyle(self):
