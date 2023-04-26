@@ -21,6 +21,7 @@ from interaction.textEngine import TextEngine
 from core.chessClock import ChessClock
 from gameModes.saveGame import SaveGame
 from gameModes.playBackGame import Player
+import interaction.boardCommunication
 
 stockPath = "stockfish-11-win\\Windows\\stockfish_20011801_x64.exe"
 
@@ -69,9 +70,6 @@ class UI(QMainWindow):
         self.startButton.clicked.connect(self.startGame)
         self.saveButton.clicked.connect(self.saveGame)
 
-        # Create an event loop
-        # self.loop = QEventLoop()
-
         # Clocks
         self.clockDark = ChessClock()
         self.clockLight = ChessClock()
@@ -96,7 +94,6 @@ class UI(QMainWindow):
         self.clock2.setLayout(clockBoxLight)
 
         # Initial board set
-
         self.variant = variant
         engine = StockEngine(stockPath)
         boardSet = engine.getPureBoard()
@@ -281,40 +278,7 @@ class UI(QMainWindow):
             self.textEdit.setText("This is not valid move")
 
     def checkMates(self):
-        if self.GS.checkKingL:
-            self.checkLight.setStyleSheet('QPushButton {background-color: %s}' % QColor(255, 0, 0).name())
-        else:
-            self.checkLight.setStyleSheet('QPushButton {background-color: %s}' % QColor(0, 160, 255).name())
-        self.checkLight.repaint()
-
-        if self.GS.checkKingD:
-            self.checkDark.setStyleSheet('QPushButton {background-color: %s}' % QColor(255, 0, 0).name())
-        else:
-            self.checkDark.setStyleSheet('QPushButton {background-color: %s}' % QColor(0, 160, 255).name())
-        self.checkDark.repaint()
-        if self.GS.mateKingL:
-            self.mateLight.setStyleSheet('QPushButton {background-color: %s}' % QColor(255, 0, 0).name())
-            self.mateLight.repaint()
-            time.sleep(3)
-            # Create a new instance of the UI class
-            new_instance = UI(self.variant)
-            # Close the current instance
-            self.close()
-        else:
-            self.mateLight.setStyleSheet('QPushButton {background-color: %s}' % QColor(0, 160, 255).name())
-
-        if self.GS.mateKingD:
-            self.mateDark.setStyleSheet('QPushButton {background-color: %s}' % QColor(255, 0, 0).name())
-            self.mateDark.repaint()
-            time.sleep(3)
-            # Create a new instance of the UI class
-            new_instance = UI(self.variant)
-            # Close the current instance
-            self.close()
-        else:
-            self.mateDark.setStyleSheet('QPushButton {background-color: %s}' % QColor(0, 160, 255).name())
-        self.mateLight.repaint()
-        self.mateDark.repaint()
+        interaction.boardCommunication.checkMates(self)
 
     @pyqtSlot(type([]), type(GameStatus))
     def onPieceReleased(self, boardSet, GS):
@@ -335,89 +299,16 @@ class UI(QMainWindow):
         self.view.setScene(self.piecesBoard)
 
     def showContextMenu(self, pos):
-        # Create right-click menu with rotate options
-        menu = QMenu(self)
-        changeBoardStyle = menu.addAction("Change board style")
-
-        # Show the menu and get the selected option
-        action = menu.exec_(self.view.mapToGlobal(pos))
-
-        # Call the appropriate rotate method based on the selected option
-        if action == changeBoardStyle:
-            self.changeBoardStyle()
+        interaction.boardCommunication.showContextMenu(self, pos)
 
     def pawnPromotion(self):
-        if any(self.GS.isPromotionL):
-            column = self.GS.isPromotionL.index(True)
-            self.createMenu()
-            if self.GS.newFig == 'K':
-                self.GS.newFig = 'N'
-            self.boardSet[column] = self.GS.newFig
-            self.GS.isPromotionL[column] = False
-        if any(self.GS.isPromotionD):
-            column = self.GS.isPromotionD.index(True)
-            self.createMenu()
-            if self.GS.newFig == 'K':
-                self.GS.newFig = 'N'
-            self.boardSet[56 + column] = self.GS.newFig.lower()
-            self.GS.isPromotionD[column] = False
+        interaction.boardCommunication.pawnPromotion(self)
 
     def createMenu(self):
-        # Create a QDialog widget as our menu window
-        promMenu = QDialog()
-        promMenu.setWindowFlags(Qt.WindowCloseButtonHint)  # disable the close button
-
-        # Create a QVBoxLayout to hold the buttons
-        layout = QVBoxLayout()
-
-        # Create four buttons and add them to the layout
-        button1 = QPushButton("Queen")
-        button2 = QPushButton("Rook")
-        button3 = QPushButton("Bishop")
-        button4 = QPushButton("Knight")
-        layout.addWidget(button1)
-        layout.addWidget(button2)
-        layout.addWidget(button3)
-        layout.addWidget(button4)
-
-        # Set the layout for the menu window
-        promMenu.setLayout(layout)
-
-        # Define a callback function for when a button is clicked
-        button_text = ""
-
-        def on_button_click():
-            # Get the text label of the clicked button
-            self.GS.newFig = promMenu.sender().text()[0]
-            # Close the menu window
-            promMenu.hide()
-
-        # Connect the callback function to each button's clicked signal
-        button1.clicked.connect(on_button_click)
-        button2.clicked.connect(on_button_click)
-        button3.clicked.connect(on_button_click)
-        button4.clicked.connect(on_button_click)
-
-        # Show the menu window
-        promMenu.exec_()
-        # Start the application event loop
+        interaction.boardCommunication.createMenu(self)
 
     def changeBoardStyle(self):
-        # Change the ChessBoard background color
-        if self.variant == 's':
-            self.variant = 'a'
-            imgPath = f":/board/{self.variant}"
-            pixmap = QPixmap(imgPath)
-            self.view.setBackgroundBrush(QBrush(pixmap))
-        else:
-            self.variant = 's'
-            imgPath = f":/board/{self.variant}"
-            pixmap = QPixmap(imgPath)
-            self.view.setBackgroundBrush(QBrush(pixmap))
-
-        # Reload the ChessBoard with the new background color
-        self.piecesBoard = ChessBoard(self.boardSet, self.variant, self, self.GS)
-        self.view.setScene(self.piecesBoard)
+        interaction.boardCommunication.changeBoardStyle(self)
 
 
 # Initialize the App
