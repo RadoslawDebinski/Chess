@@ -1,8 +1,8 @@
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
-import chessGraphics
-from chessEngine import ChessEngine
+import interaction.chessGraphics
+from core.chessEngine import ChessEngine
 import numpy as np
 import time
 

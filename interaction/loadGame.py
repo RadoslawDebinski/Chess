@@ -1,11 +1,8 @@
 import socket
 import threading
 
-import numpy as np
-from PyQt5.QtTest import QTest
 from PyQt5.QtWidgets import QGroupBox, QPushButton, QTextEdit, QMenu
 from PyQt5.QtGui import QPixmap, QBrush
-from PyQt5.QtWidgets import QGraphicsSceneMouseEvent
 
 from PyQt5 import uic
 import sys
@@ -14,16 +11,16 @@ from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import QMouseEvent
 
-from chessBoard import ChessBoard
-from stockEngine import StockEngine
-from chessEngine import ChessEngine
-import chessGraphics
-from gamesStatus import GameStatus
+from core.chessBoard import ChessBoard
+from gameModes.stockEngine import StockEngine
+from core.chessEngine import ChessEngine
+import interaction.chessGraphics
+from core.gamesStatus import GameStatus
 import time
-from textEngine import TextEngine
-from chessClock import ChessClock
-from saveGame import SaveGame
-from playBackGame import Player
+from interaction.textEngine import TextEngine
+from core.chessClock import ChessClock
+from gameModes.saveGame import SaveGame
+from gameModes.playBackGame import Player
 
 stockPath = "stockfish-11-win\\Windows\\stockfish_20011801_x64.exe"
 
@@ -38,7 +35,7 @@ class UI(QMainWindow):
         self.hints = []
 
         # Load the ui file
-        uic.loadUi("loadui.ui", self)
+        uic.loadUi("interaction\\loadui.ui", self)
         self.setWindowTitle("Chess Game")
 
         # Define Our Widgets

@@ -1,5 +1,5 @@
-from chessEngine import ChessEngine
-from gamesStatus import GameStatus
+from core.chessEngine import ChessEngine
+from core.gamesStatus import GameStatus
 import numpy as np
 from itertools import zip_longest
 import re

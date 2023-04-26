@@ -3,7 +3,7 @@ import os
 from PyQt5.QtWidgets import QApplication, QWidget, QRadioButton, QLineEdit, QGridLayout, QMainWindow, QComboBox, \
     QPushButton
 from PyQt5 import uic
-from loadGame import UI
+from interaction.loadGame import UI
 import json
 
 
@@ -12,7 +12,7 @@ class InputUI(QMainWindow):
         super(InputUI, self).__init__()
 
         # Load the ui file
-        uic.loadUi("startui.ui", self)
+        uic.loadUi("interaction\\startui.ui", self)
         self.setWindowTitle("Input")
 
         # Define Our Widgets

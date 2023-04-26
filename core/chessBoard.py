@@ -1,7 +1,7 @@
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
-from chessPiece import ChessPiece
+from core.chessPiece import ChessPiece
 from PyQt5.QtCore import QPoint, pyqtSignal
 import numpy as np
 

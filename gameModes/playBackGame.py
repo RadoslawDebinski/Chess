@@ -3,7 +3,7 @@ import xml.etree.ElementTree as ET
 
 import numpy as np
 
-from chessEngine import ChessEngine
+from core.chessEngine import ChessEngine
 import time
 
 
