@@ -43,7 +43,6 @@ class ChessPiece(QGraphicsItem):
             if event.button() == Qt.LeftButton:
                 self.setCursor(Qt.ClosedHandCursor)
                 movesFrom = self.GS.validMovesFrom
-                print(f'Im pressed at:{time.time()}')
                 pieceLoc = np.array([self.y, self.x])
                 fromIdx = []
                 # Finding indexes of valid moves for our piece
@@ -100,5 +99,4 @@ class ChessPiece(QGraphicsItem):
 
     def paint(self, painter, option, widget):
         painter.drawImage(self.windX, self.windY, self.image)
-        print(self.windX, self.windY, self.image)
 

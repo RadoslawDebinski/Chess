@@ -168,7 +168,6 @@ class UI(QMainWindow):
     def receiveMess(self):
         while True:
             data = self.client_socket.recv(1024).decode()
-            print(data)
             ranks = {'1': 7, '2': 6, '3': 5, '4': 4, '5': 3, '6': 2, '7': 1, '8': 0}
             files = {'a': 0, 'b': 1, 'c': 2, 'd': 3, 'e': 4, 'f': 5, 'g': 6, 'h': 7}
             colFrom, rowFrom, colTo, rowTo = files[data[0]], ranks[data[1]], files[data[2]], ranks[data[3]]
@@ -196,7 +195,6 @@ class UI(QMainWindow):
             files = {v: k for k, v in files.items()}
 
             rowFrom, colFrom, rowTo, colTo = files[colFrom], ranks[rowFrom], files[colTo], ranks[rowTo]
-            print(f'{rowFrom}{colFrom}{rowTo}{colTo}')
             self.client_socket.send(f'{rowFrom}{colFrom}{rowTo}{colTo}'.encode())
 
     def startGame(self):

@@ -40,10 +40,10 @@ class ChessEngine:
         self.longCastling(self.GS.kingDLoc[0], self.GS.kingDLoc[1])
         return self.GS
 
-    #############################################
+    #################################################
     # self.GS.side == 'l' <----> startPiece.isupper()
     # self.GS.side != 'l' <----> startPiece.islower()
-    #############################################
+    #################################################
     def rook(self, r, c):
         startPiece = self.squareSet[r][c]
         directions = ((-1, 0), (0, -1), (1, 0), (0, 1))
