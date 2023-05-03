@@ -1,28 +1,49 @@
 import chess
 import chess.engine
-import random
 import time
 import numpy as np
+from threading import Thread
 from gameModes.stockEngine import StockEngine
 
 
-stockPath = "..\\stockfish-11-win\\Windows\\stockfish_20011801_x64.exe"
+# stockPath = "..\\stockfish-11-win\\Windows\\stockfish_20011801_x64.exe"
+stockPath = "..\\stockfish_15.1_win_x64_avx2\\stockfish-windows-2022-x86-64-avx2.exe"
 
 class Creator:
-    def __init__(self):
+    def __init__(self, destinationPath, noThreads=10, threadPackages=2, packageSize=100):
         self.input = np.array([])
         self.output = np.array([])
-        self.visual = []
-        self.createDataBase()
-        self.createFile()
+        self.destinationPath = destinationPath
+        self.threadPackages = threadPackages
+        self.packageSize = packageSize
+
+        start_time = time.time()
+        threads = []
+        for i in range(noThreads):
+            name = f'thread{i}_'
+            t = Thread(target=self.threadFunc, args=(name,))
+            threads.append(t)
+            t.start()
+
+        for t in threads:
+            t.join()
+
+        end_time = time.time()
+        print(f'It took {end_time- start_time} second(s) to complete.')
+
+    def threadFunc(self, threadName):
+        for _ in range(self.threadPackages):
+            inputData = np.array([])
+            outputData = np.array([])
+            inputData, outputData = self.createDataBase(self.packageSize, inputData, outputData)
+            self.createFile(threadName, inputData, outputData)
 
     def randomBoard(self, maxDepth=200):
         board = chess.Board()
-        depth = random.randrange(0, maxDepth)
-
+        depth = np.random.randint(0, maxDepth)
         for _ in range(depth):
             allMoves = list(board.legal_moves)
-            randomMove = random.choice(allMoves)
+            randomMove = np.random.choice(allMoves)
             board.push(randomMove)
             if board.is_game_over():
                 break
@@ -62,37 +83,32 @@ class Creator:
 
     def stockfish(self, fen):
         engine = StockEngine(stockPath)
-        evaluation = engine.getEvaluation(fen)
         return engine.getEvaluation(fen)['value']
 
-    def createFile(self):
-        # with open('data\\test.npz', 'wb') as f:
-        #     np.save(f, self.input)
-        #     np.save(f, self.output)
-        # with open('data\\test.npz', 'rb') as f:
-        #     a = np.load(f)
-        #     b = np.load(f)
-        valid = np.count_nonzero(self.output)
-        print(valid)
+    def createFile(self, threadName, inputData, outputData):
+        filePath = f'{self.destinationPath}\\{threadName}_{time.strftime("%Y%m%d-%H%M%S")}.npz'
+        with open(filePath, 'wb') as f:
+            np.save(f, inputData)
+            np.save(f, outputData)
 
-    def createDataBase(self, length=1):
-        self.input = np.zeros((length, 4, 8, 8), dtype=np.int8)
-        self.output = np.zeros(length, dtype=np.int8)
+    def createDataBase(self, length, inputData, outputData):
+        inputData = np.zeros((length, 4, 8, 8), dtype=np.int8)
+        outputData = np.zeros(length, dtype=np.int8)
 
-        self.input, self.output = zip(*[self.splitEvaluate() for _ in range(length)])
-        self.input = np.array(self.input, dtype=np.int8)
-        self.output = np.array(self.output, dtype=np.int8)
+        inputData, outputData = zip(*[self.splitEvaluate() for _ in range(length)])
+        inputData = np.array(inputData, dtype=np.int8)
+        outputData = np.array(outputData, dtype=np.int8)
+        return inputData, outputData
 
     def splitEvaluate(self):
         board = self.randomBoard()
         fen = board.fen()
-        self.visual = board
         evaluation = self.stockfish(fen)
+        if evaluation == 0:
+            return self.splitEvaluate()
         board = self.splitBoard(board)
         return board, evaluation
 
+
 if __name__ == '__main__':
-    start = time.time()
-    Creator()
-    end = time.time()
-    print(end-start)
+    Creator('data')
