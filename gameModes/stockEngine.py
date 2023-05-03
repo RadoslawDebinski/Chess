@@ -5,7 +5,7 @@ class StockEngine:
 
     def __init__(self, stockPath):
         self.stockPath = stockPath
-        self.engine = Stockfish(path=self.stockPath, depth=18,
+        self.engine = Stockfish(path=self.stockPath, depth=3,
                                 parameters={"UCI_Elo": 3000, "Hash": 16, "Threads": 1, "Minimum Thinking Time": 30})
         self.moves = []
 

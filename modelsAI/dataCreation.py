@@ -9,8 +9,9 @@ from gameModes.stockEngine import StockEngine
 # stockPath = "..\\stockfish-11-win\\Windows\\stockfish_20011801_x64.exe"
 stockPath = "..\\stockfish_15.1_win_x64_avx2\\stockfish-windows-2022-x86-64-avx2.exe"
 
+
 class Creator:
-    def __init__(self, destinationPath, noThreads=10, threadPackages=2, packageSize=100):
+    def __init__(self, destinationPath, noThreads=12, threadPackages=7, packageSize=6140):
         self.input = np.array([])
         self.output = np.array([])
         self.destinationPath = destinationPath
@@ -111,4 +112,4 @@ class Creator:
 
 
 if __name__ == '__main__':
-    Creator('data')
+    Creator('data3')
