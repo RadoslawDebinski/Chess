@@ -62,7 +62,7 @@ class InputUI(QMainWindow):
             else:
                 variant = 's'
                 tcpIp = None
-            UI(variant, historySource, tcpIp, False)
+            UI(variant, historySource, tcpIp, 0)
         # Multi player mode
         if self.multiButton.isChecked():
             # Variant, IP, Port from config source
@@ -70,11 +70,23 @@ class InputUI(QMainWindow):
                 with open(f'configs\\{configSource}', 'r') as file:
                     conf = json.load(file)
                     variant, tcpIp = conf.split('\n')
-            # Variant default, IP/Port from user
             else:
                 variant = 's'
-                tcpIp = self.lineEdit.text()  + "H" + self.lineEdit2.text()
-            UI(variant, historySource, tcpIp, True)
+                tcpIp = f"{self.lineEdit.text()}H{self.lineEdit2.text()}"
+            UI(variant, historySource, tcpIp, 1)
+        # AI player mode
+        if self.aiButton.isChecked():
+            # Variant, IP, Port from config source
+            if configSource != '':
+                with open(f'configs\\{configSource}', 'r') as file:
+                    conf = json.load(file)
+                    variant, = conf.split('\n')
+                    tcpIp = None
+            else:
+                variant = 's'
+                tcpIp = None
+            UI(variant, historySource, tcpIp, 2)
+
 
 # Initialize the App
 if __name__ == '__main__':

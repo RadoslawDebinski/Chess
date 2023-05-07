@@ -52,31 +52,24 @@ class TextEngine:
             validMovesFrom = self.GS.validMovesFromLight
             validMovesTo = self.GS.validMovesToLight
 
-        ranks = {'1': 7, '2': 6, '3': 5, '4': 4, '5': 3, '6': 2, '7': 1, '8': 0}
-        files = {'a': 0, 'b': 1, 'c': 2, 'd': 3, 'e': 4, 'f': 5, 'g': 6, 'h': 7}
-
         if self.move == '0-0':
             if self.GS.side == 'l':
                 destinationRank = 7
-                destinationFile = 6
                 sourceRank = 7
-                sourceFile = 4
             else:
                 destinationRank = 0
-                destinationFile = 6
                 sourceRank = 0
-                sourceFile = 4
+            sourceFile = 4
+            destinationFile = 6
         elif self.move == '0-0-0':
             if self.GS.side == 'l':
                 destinationRank = 7
-                destinationFile = 2
                 sourceRank = 7
-                sourceFile = 4
             else:
                 destinationRank = 0
-                destinationFile = 2
                 sourceRank = 0
-                sourceFile = 4
+            sourceFile = 4
+            destinationFile = 2
         else:
             # Determine the piece being moved
             if self.move[0] in pieces:
@@ -89,7 +82,10 @@ class TextEngine:
                 piece = 'p'
                 startIndex = 0
 
+            ranks = {'1': 7, '2': 6, '3': 5, '4': 4, '5': 3, '6': 2, '7': 1, '8': 0}
             destinationRank = ranks[self.move[-1]]
+            files = {'a': 0, 'b': 1, 'c': 2, 'd': 3, 'e': 4, 'f': 5, 'g': 6, 'h': 7}
+
             destinationFile = files[self.move[-2]]
             # Finding indexes of valid moves
             toIdx = [i for i, loc in enumerate(validMovesTo) if loc[0] == destinationRank and loc[1] == destinationFile]

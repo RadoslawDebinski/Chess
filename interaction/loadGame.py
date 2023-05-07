@@ -21,6 +21,7 @@ from interaction.textEngine import TextEngine
 from core.chessClock import ChessClock
 from gameModes.saveGame import SaveGame
 from gameModes.playBackGame import Player
+from gameModes.controllerAI import PlayerAI
 import interaction.boardCommunication
 
 stockPath = "stockfish-11-win\\Windows\\stockfish_20011801_x64.exe"
@@ -95,8 +96,8 @@ class UI(QMainWindow):
 
         # Initial board set
         self.variant = variant
-        engine = StockEngine(stockPath)
-        boardSet = engine.getPureBoard()
+        sEngine = StockEngine(stockPath)
+        boardSet = sEngine.getPureBoard()
         self.boardSet = boardSet
         # Initial game status recorder
         self.GS = GameStatus()
@@ -117,8 +118,8 @@ class UI(QMainWindow):
         self.view.setFixedSize(802, 802)
 
         # Locate and set labels
-        labelAbcdPath = f":/label/abcd"
-        label1234Path = f":/label/1234"
+        labelAbcdPath = ":/label/abcd"
+        label1234Path = ":/label/1234"
         pixmapAbcd = QPixmap(labelAbcdPath)
         pixmap1234 = QPixmap(label1234Path)
         # Create a QLabel widget and set the pixmap as its contents
@@ -149,7 +150,7 @@ class UI(QMainWindow):
         # Multiplayer connection data
         self.tcpIp = tcpIp
         self.gameMode = gameMode
-        if gameMode:
+        if gameMode == 1:
             ip, port = tcpIp.split('H')
             # ip, port = tcpIp.split(':')
             self.client_socket = socket.socket(socket.AF_INET6, socket.SOCK_STREAM)
@@ -157,6 +158,8 @@ class UI(QMainWindow):
 
             receiveThread = threading.Thread(target=self.receiveMess)
             receiveThread.start()
+        if gameMode == 2:
+            self.bot = PlayerAI(False, sEngine)
 
     def playBackHistory(self, historySource):
         if historySource:
@@ -282,17 +285,29 @@ class UI(QMainWindow):
     def onPieceReleased(self, boardSet, GS):
         self.GS = GS
         self.boardSet = boardSet
-        self.pawnPromotion()
+        self.nextTour()
+        if self.gameMode == 2:
+            # self.bot.translate_to_stockfish(self.GS.stackFrom, self.GS.stackTo)
+            # self.bot.get_move_stockfish()
+            # self.bot.move(self)
+            self.bot.get_model_boards(self)
+            self.bot.get_best_model_move(self)
+            self.boardSet, self.GS = self.bot.move(self.boardSet, self.GS)
+            self.nextTour()
 
+    def nextTour(self):
+        self.pawnPromotion()
         # Next Player
         self.GS.clearStatus()
-
         # Generate list of all valid moves
         engine = ChessEngine(self.boardSet, self.GS)
         self.GS = engine.genValidMoves()
         # Report Mates
         self.GS = engine.checkMates(self.GS)
         self.checkMates()
+        self.updateBoardset()
+
+    def updateBoardset(self):
         self.piecesBoard = ChessBoard(self.boardSet, self.variant, self, self.GS)
         self.view.setScene(self.piecesBoard)
 

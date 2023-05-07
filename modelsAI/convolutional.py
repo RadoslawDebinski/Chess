@@ -8,7 +8,10 @@ import tensorflow.keras.utils as utils
 import tensorflow.keras.optimizers as optimizers
 import tensorflow.keras.callbacks as callbacks
 import tensorflow.keras.losses as losses
-
+import tensorflow as tf
+from tensorflow.keras.callbacks import ModelCheckpoint
+from tensorflow.python.client import device_lib
+print(device_lib.list_local_devices())
 
 class ConvolutionalModelTeaching:
     def __init__(self, dir_path):
@@ -18,20 +21,30 @@ class ConvolutionalModelTeaching:
         self.dir_path = dir_path
         self.x_data, self.y_data = self.get_data()
 
-        filePath = f'data_size_13_norm_out\\20230505-174522.npz'
+        filePath = f'C:\\aidata\\data_size_13_norm_out\\20230505-174522.npz'
         with open(filePath, 'rb') as f:
             self.y_data = np.load(f)
 
         end_time = time.time()
         print(f'It took {end_time - start_time} second(s) to load data.')
 
-        model = self.build_model(32, 4)
+        model = self.build_model(16, 4)
         loss = losses.SparseCategoricalCrossentropy()
-        model.compile(optimizer=optimizers.Adam(lr=0.01), loss='mean_squared_error', metrics=["accuracy"])
+        model.compile(optimizer=optimizers.Adam(5e-4), loss='mean_squared_error')
         model.summary()
-        model.fit(self.x_data, self.y_data, batch_size=1024, epochs=10, verbose=1, validation_split=0.1,
+        checkpoint_filepath = '/tmp/checkpoint/'
+        model_checkpointing_callback = ModelCheckpoint(
+            filepath=checkpoint_filepath,
+            save_best_only=True,
+        )
+        model.fit(self.x_data, self.y_data,
+                  batch_size=2048,
+                  epochs=10,
+                  verbose=1,
+                  validation_split=0.1,
                   callbacks=[callbacks.ReduceLROnPlateau(monitor='loss', patience=10),
-                             callbacks.EarlyStopping(monitor='loss', patience=2, min_delta=0.01)])
+                             callbacks.EarlyStopping(monitor='loss', patience=15, min_delta=1e-4),
+                             model_checkpointing_callback])
 
         model.save('model.h5')
 
@@ -95,5 +108,5 @@ class ConvolutionalModelTeaching:
 
 
 if __name__ == '__main__':
-    dir_path = r'data_size_13'
+    dir_path = r'C:\\aidata\\data_size_13'
     ConvolutionalModelTeaching(dir_path)

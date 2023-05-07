@@ -32,6 +32,4 @@ class StockEngine:
         board = board.translate({ord(i): None for i in '+-|'})
         board = board.translate({ord('\n'): None})
 
-        pureBoard = [sign for i, sign in enumerate(board) if (i + 2) % 3 == 0]
-
-        return pureBoard
+        return [sign for i, sign in enumerate(board) if (i + 2) % 3 == 0]

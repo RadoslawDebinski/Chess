@@ -64,6 +64,8 @@ class ChessPiece(QGraphicsItem):
                 self.UI.hideHints()
                 if self.isValidPosition(newPos):
                     self.UI.onPieceReleased(self.boardSet, self.GS)
+                else:
+                    self.UI.updateBoardset()
 
     def isValidPosition(self, newPos):
         # Check if the new position is within the bounds of the chessboard
@@ -74,6 +76,9 @@ class ChessPiece(QGraphicsItem):
         prevPosIdy = int(self.windY / 100)
         newPosCol = int(newPos.x() / 100)
         newPosRow = int(newPos.y() / 100)
+
+        if newPosRow == prevPosIdy and newPosCol == prevPosIdx:
+            return False
 
         where = None
         try:
@@ -88,7 +93,8 @@ class ChessPiece(QGraphicsItem):
             self.GS.stackFrom.append([prevPosIdy, prevPosIdx])
             self.GS.stackTo.append([newPosRow, newPosCol])
             self.GS.changeSide()
-            self.UI.sendMessage(prevPosIdy, prevPosIdx, newPosRow, newPosCol)
+            if self.UI.gameMode == 1:
+                self.UI.sendMessage(prevPosIdy, prevPosIdx, newPosRow, newPosCol)
         # Report check
         self.GS.clearStatus()
         self.GS = engine.checkCheck(self.boardSet, self.GS)
