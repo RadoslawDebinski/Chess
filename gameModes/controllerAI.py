@@ -6,6 +6,45 @@ from tensorflow.keras import models
 from core.chessEngine import ChessEngine
 from gameModes.stockEngine import StockEngine
 import numpy as np
+import gc
+
+
+def translate_to_model_input(boardSets):
+    translation = {
+        'P': (1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+        'N': (0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+        'B': (0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+        'R': (0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+        'Q': (0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0),
+        'K': (0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0),
+        'p': (0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0),
+        'n': (0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0),
+        'b': (0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0),
+        'r': (0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0),
+        'q': (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0),
+        'k': (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0),
+        ' ': (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1)
+    }
+    translation_keys = list(translation.keys())
+    translation_values = np.array(list(translation.values()))
+
+    translation_keys = list(translation.keys())
+    translation_values = np.array(list(translation.values()))
+
+    def generate_new_boards(boardSets):
+        new_board = np.zeros((13, 8, 8), dtype=np.int8)
+        boardLen = 8
+        for board in boardSets:
+            for i, j in itertools.product(range(8), range(8)):
+                key = board[i * boardLen + j]
+                idx = translation_keys.index(key)
+                new_board[:, i, j] = translation_values[idx]
+            yield new_board
+
+    new_boards = np.stack(list(generate_new_boards(boardSets)), axis=0)
+
+    return new_boards
+
 
 class PlayerAI:
     def __init__(self, model, sEngine):
@@ -39,12 +78,10 @@ class PlayerAI:
         validMovesFromDark = UI.GS.validMovesFromDark[1:]
         validMovesToDark = UI.GS.validMovesToDark[1:]
         boardSets = []
-        for moveFrom, moveTo in zip(validMovesFromDark, validMovesToDark):
-            engine = ChessEngine(UI.boardSet, UI.GS)
-            boardSet, GS = engine.move(moveFrom[0], moveFrom[1], moveTo[0], moveTo[1])
-            boardSets.append(boardSet)
+        boardSets = [ChessEngine(UI.boardSet, UI.GS).move(moveFrom[0], moveFrom[1], moveTo[0], moveTo[1])[0]
+                     for moveFrom, moveTo in zip(validMovesFromDark, validMovesToDark)]
 
-        self.boardSets = self.translate_to_model_input(boardSets)
+        self.boardSets = translate_to_model_input(boardSets)
 
     def get_best_model_move(self, UI):
         # model = models.load_model(r'C:\\aidata\\model.h5')
@@ -55,37 +92,6 @@ class PlayerAI:
         bestMoveTo = UI.GS.validMovesToDark[moveIdx+1]
         self.bestMove = [bestMoveFrom[0], bestMoveFrom[1], bestMoveTo[0], bestMoveTo[1]]
         print(self.bestMove)
-
-    def translate_to_model_input(self, boardSets):
-        translation = {
-            'P': (1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
-            'N': (0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
-            'B': (0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
-            'R': (0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0),
-            'Q': (0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0),
-            'K': (0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0),
-            'p': (0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0),
-            'n': (0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0),
-            'b': (0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0),
-            'r': (0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0),
-            'q': (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0),
-            'k': (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0),
-            ' ': (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1)
-        }
-        translation_keys = list(translation.keys())
-        translation_values = np.array(list(translation.values()))
-
-        new_boards = np.zeros((1, 13, 8, 8), dtype=np.int8)
-        new_board = np.zeros((13, 8, 8), dtype=np.int8)
-        boardLen = 8
-        for board in boardSets:
-            for i, j in itertools.product(range(8), range(8)):
-                key = board[i * boardLen + j]
-                idx = translation_keys.index(key)
-                new_board[:, i, j] = translation_values[idx]
-            new_boards = np.concatenate((new_boards, [new_board]), axis=0)
-
-        return new_boards[1:, :, :, :]
 
     def move(self, boardSet, GS):
         prevRow, prevCol = self.bestMove[0], self.bestMove[1]

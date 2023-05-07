@@ -5,6 +5,8 @@ from PyQt5.QtWidgets import QApplication, QWidget, QRadioButton, QLineEdit, QGri
 from PyQt5 import uic
 from interaction.loadGame import UI
 import json
+import gc
+
 
 
 class InputUI(QMainWindow):
@@ -90,6 +92,8 @@ class InputUI(QMainWindow):
 
 # Initialize the App
 if __name__ == '__main__':
+    print(gc.get_stats())
+    gc.set_threshold(900, 15, 15)
     app = QApplication(sys.argv)
     UIWindow = InputUI()
     app.exec_()

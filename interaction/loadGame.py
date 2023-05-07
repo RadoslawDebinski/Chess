@@ -23,6 +23,7 @@ from gameModes.saveGame import SaveGame
 from gameModes.playBackGame import Player
 from gameModes.controllerAI import PlayerAI
 import interaction.boardCommunication
+import streamlit
 
 stockPath = "stockfish-11-win\\Windows\\stockfish_20011801_x64.exe"
 
@@ -96,8 +97,8 @@ class UI(QMainWindow):
 
         # Initial board set
         self.variant = variant
-        sEngine = StockEngine(stockPath)
-        boardSet = sEngine.getPureBoard()
+        self.sEngine = StockEngine(stockPath)
+        boardSet = self.sEngine.getPureBoard()
         self.boardSet = boardSet
         # Initial game status recorder
         self.GS = GameStatus()
@@ -158,8 +159,8 @@ class UI(QMainWindow):
 
             receiveThread = threading.Thread(target=self.receiveMess)
             receiveThread.start()
-        if gameMode == 2:
-            self.bot = PlayerAI(False, sEngine)
+        # if gameMode == 2:
+        #     self.bot = PlayerAI(False, sEngine)
 
     def playBackHistory(self, historySource):
         if historySource:
@@ -283,6 +284,7 @@ class UI(QMainWindow):
 
     @pyqtSlot(type([]), type(GameStatus))
     def onPieceReleased(self, boardSet, GS):
+        # caching.clear_cache()
         self.GS = GS
         self.boardSet = boardSet
         self.nextTour()
@@ -290,9 +292,11 @@ class UI(QMainWindow):
             # self.bot.translate_to_stockfish(self.GS.stackFrom, self.GS.stackTo)
             # self.bot.get_move_stockfish()
             # self.bot.move(self)
-            self.bot.get_model_boards(self)
-            self.bot.get_best_model_move(self)
-            self.boardSet, self.GS = self.bot.move(self.boardSet, self.GS)
+            bot = PlayerAI(False, self.sEngine)
+            bot.get_model_boards(self)
+            bot.get_best_model_move(self)
+            boardSet, self.GS = bot.move(self.boardSet, self.GS)
+            del bot
             self.nextTour()
 
     def nextTour(self):
