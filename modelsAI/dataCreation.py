@@ -218,4 +218,4 @@ class Translator:
 
 if __name__ == '__main__':
     # Creator('data3')
-    Translator('data3', 'data_size_13')
+    Translator('C:\\aidata\\data3', 'C:\\aidata\\data_size_13_back')
