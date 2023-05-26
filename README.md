@@ -10,7 +10,7 @@ The purpose of the project was to create a chess game with a dedicated logic eng
 * **Saving game status** in JSON file;
 * **Animated history playback** gave from the file (controlled by the engine);
 * **Marking possible moves** while holding a piece.
-* 
+
 The application was written in Python 3.10.9, using the Qt Framework, in the PyCharm 2023.1.1 (Professional Edition) environment.
 
 # User interfece
@@ -44,30 +44,56 @@ Interface is splitted to two main parts:
       
       Fig. 3. The game user interface with second color style
       
-# Code (TO BE CONTINUED)
+# Code
 The structure of the project files is as follows:
-* main.py - …
-* server.py - …
-* configs - …
-* saves - …
-* core folder - …
-  * chessBoard.py -  …
-  * chessClock.py - …
-  * chessEngine.py - …
-  * chessPiece.py - …
-  * gameStaus.py - …
-* gameModes folder - …
-  * controllerAI.py - …
-  * playBackGame.py - …
-  * saveGame.py - …
-  * stockEngine.py -  …
-* interaction folder - …
-  * boardCommunication.py -  …
-  * chessGraphics.py - …
-  * loadGame.py - …
-  * loadui.ui, start.ui -  …
-  * textEngine.py - …
-* modelsAI folder- …
-  * convolutional.py - …
-  * dataCreation.py -  …
-  * evolutionary.py - …
+* _**main.py**_ - simple UI with a selection of game mode;
+* _**server.py**_ - example of IPv6 server for multiplayer connection;
+* _**configs folder**_ - holding JSON files with saved games configurations;
+* _**saves folder**_ - holding DB and XML files with games histories;
+* _**core folder**_ - all main elements of the the chess game;
+  * _**chessBoard.py**_ - a class that creates all pieces objects due to current board set configuration; 
+  * _**chessClock.py**_ - a module that creates and updates analog clocks for each player;
+  * _**chessEngine.py**_ - chess logic engine. It takes as input the current board set and games status and gives new ones as output. All chess rules were implemented among others:
+    * en passant;
+    * promotion;
+    * castling;
+  * _**chessPiece.py**_ - this class creates a single chess piece and proceeds with its movement on board. Calculations for holding and releasing a piece are included;
+  * _**gameStaus.py**_ - a class which contains all useful information for all game modes like single, multi, playback etc.;
+* _**gameModes**_ folder - other useful classes specified in chosen game mode;
+  * _**controllerAI.py**_ - a class which translates current board set to inputs for neural network and proceeds its movement;
+  * _**playBackGame.py**_ - module which retraces all moves from gives DB or XML file;
+  * _**saveGame.py**_ - a class which creates files mentioned in configs and saves;
+  * _**stockEngine.py**_ - implementation of communication wich stockfish engine due to teaching AI model;
+* _**interaction**_ folder - all modules somehow connected with UI;
+  * _**boardCommunication.py**_ - set of functions which proceed user communication windows;
+  * _**chessGraphics.py**_ - binary file created from .qrc which contains all used graphics;
+  * _**loadGame.py**_ - a main class which proceeds:
+    * communication with the player by load.ui interface;
+    * history playback triggering;
+    * communication by IPv6 protocol;
+    * data transfer of text messages;
+    * and more minor functionalities;
+  * _**loadui.ui**_, _**start.ui**_ - user interfaces;
+  * _**textEngine.py**_ - a translator from chess algebraic notation to chess board coordinates;
+* _**modelsAI**_ folder - files that are necessary for AI game mode creation not for the game as such;
+  * _**convolutional.py**_ - convolutional neural network teaching model;
+  * _**dataCreation.py**_ - creation of dataset with inputs and outputs for teaching;
+  * _**evolutionary.py**_ - skeleton for future usage of evolutionary algorithm supported bot;
+
+# Discussion
+
+To sum up the implementation of the above project, the application implements all the initial assumptions. The undoubted advantages of our solution include:
+* **Intuitive interface**, the application is legible and does not contain any redundant elements which could confuse the user;
+* A significant amount of **game modes** single, multi and AI enforced;
+* **Changeable graphic layout** for board and pieces;
+* **Immersive analog clocks**;
+* **Saving and playback** of game status which makes it less binding and more flexible for daily usage;
+* **Chess algebraic notation** for those who want to learn serious chess tournaments slang;
+
+On the other hand, there are also flaws in the application and eliminating them would be the first step in the further development of the project. Future upgrades that have not yet been undertaken may include:
+* **Interface improvements** to enhance its aesthetics;
+* **Adding a dark background** for the entire application, it's standard in today's software to make the background of the UI have at least a light and dark version;
+* **Implementation of difficulty levels** by the usage of different AI models like for example evolutionary algorithm mentioned in evolutionary.py. Usage of different models should cause the creation of bots with different playstyles not only various skill levels
+
+Thus, the product already has a number of useful functionalities and is fully usable, but there is still a lot of room for future development.
+
